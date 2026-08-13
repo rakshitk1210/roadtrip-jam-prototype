@@ -79,7 +79,7 @@ export const STICKERS: Sticker[] = [
   {
     id: 'mount-baker',
     label: 'Mount Baker',
-    image: '/assets/sticker-north-cascades.png',
+    image: '/assets/sticker-mount-baker.png',
     coord: [-121.8144, 48.7767],
     width: 42,
     minZoom: 8.5,
