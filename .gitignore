@@ -1,0 +1,9 @@
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+*.log
+
+# `.env` is committed on purpose (public Mapbox token). `.env.local` stays out
+# so anyone can override it with their own token without touching the repo.
+.env.local

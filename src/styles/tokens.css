@@ -1,0 +1,86 @@
+/* Values lifted from the Figma file (Playground / section 1436:13995). */
+:root {
+  /* Ink */
+  --ink-primary: #202124;
+  --ink-secondary: #5f6368;
+  --ink-muted: #a6a6a6;
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-dim: #f1f3f4;
+  --surface-panel: #f8f8f8;
+  --drag-handle: #c4c7c5;
+
+  /* Cyan — the Roadtrip Jam action colour */
+  --cyan-on: #073b41;
+  --cyan-soft: #d3edf2;
+  --cyan-ai: #e2fcff;
+  --cyan-pin: #14b4c6;
+
+  /* Avocado map */
+  --avocado-land: #abce83;
+  --avocado-water: #aee2e0;
+  --avocado-road: #ebf4a4;
+  --route-blue: #1a73e8;
+
+  --shadow-sheet: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);
+  --shadow-pill: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* Google Sans Flex is not distributable — Roboto is its closest public sibling
+     and is what Maps falls back to anyway. */
+  --font: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--ink-primary);
+  background: #dfe1e5;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+}
+
+/* Phone frame: full bleed on a handset, a centred 402x872 device on a laptop. */
+.phone {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--avocado-land);
+}
+
+@media (min-width: 520px) {
+  body {
+    display: grid;
+    place-items: center;
+  }
+  .phone {
+    width: 402px;
+    height: min(872px, 96dvh);
+    border-radius: 44px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  }
+}
