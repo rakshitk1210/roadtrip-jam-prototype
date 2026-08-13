@@ -340,6 +340,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* The faked iOS status bar used to supply this offset. `env()` keeps the
+     title row clear of the notch if this is ever added to a home screen. */
+  padding-top: max(16px, env(safe-area-inset-top));
   padding-bottom: 16px;
   background: linear-gradient(180deg, #accf83 0%, rgba(172, 207, 131, 0) 100%);
   backdrop-filter: blur(2px);
@@ -352,33 +355,13 @@
   pointer-events: auto;
 }
 
-.status-bar {
-  display: flex;
-  align-items: center;
-  padding: 21px 16px 19px;
-}
-
-.status-time {
-  flex: 1;
-  text-align: center;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.status-levels {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-}
-
 .title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 370px;
-  margin: 4px auto 0;
+  /* Same 16px gutter as .search-row and .chip-row below. */
+  padding: 0 16px;
+  margin-top: 4px;
 }
 
 .title-row .title {

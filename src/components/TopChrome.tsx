@@ -16,21 +16,12 @@ const TOPBAR_AVATARS = [
   { src: '/assets/topbar-av-4.jpg', size: 12.4, left: 24.1, top: 17.2 },
 ]
 
-/** Status bar, title row, AI search field and category chips. */
+/** Title row, AI search field and category chips. */
 export function TopChrome() {
   const { backToYou } = useTrip()
 
   return (
     <div className="top-chrome">
-      <div className="status-bar">
-        <span className="status-time">9:41</span>
-        <span className="status-levels">
-          <img src="/assets/ic-cellular.svg" alt="" width={19.2} height={12.2} />
-          <img src="/assets/ic-wifi.svg" alt="" width={17.1} height={12.3} />
-          <img src="/assets/ic-battery.svg" alt="" width={27.3} height={13} />
-        </span>
-      </div>
-
       <div className="title-row">
         <button className="round-btn" onClick={backToYou} aria-label="Back">
           <Icon name="arrow_back" />
