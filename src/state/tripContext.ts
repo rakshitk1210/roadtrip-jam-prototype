@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
 export type Screen = 'you' | 'trip'
-export type Tab = 'itinerary' | 'route'
+export type Tab = 'itinerary' | 'discover'
 export type Snap = 'peek' | 'half' | 'full'
 
 export interface ItineraryItem {

@@ -82,7 +82,7 @@ function TripRow({ item }: { item: ListItem }) {
   )
 }
 
-export function OnYourRouteTab() {
+export function DiscoverTab() {
   return (
     <div className="sheet-card">
       <section className="list-section">

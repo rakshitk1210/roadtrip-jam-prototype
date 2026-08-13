@@ -2,7 +2,7 @@ import { TopChrome } from '../components/TopChrome'
 import { MapCanvas } from '../map/MapCanvas'
 import { BottomSheet } from '../sheet/BottomSheet'
 import { ItineraryTab } from '../sheet/ItineraryTab'
-import { OnYourRouteTab } from '../sheet/OnYourRouteTab'
+import { DiscoverTab } from '../sheet/DiscoverTab'
 import { PlaceDetailSheet } from '../sheet/PlaceDetailSheet'
 import { useTrip } from '../state/tripContext'
 
@@ -33,11 +33,11 @@ export function TripMapScreen() {
               </button>
               <button
                 role="tab"
-                aria-selected={tab === 'route'}
-                className={tab === 'route' ? 'is-active' : ''}
-                onClick={() => setTab('route')}
+                aria-selected={tab === 'discover'}
+                className={tab === 'discover' ? 'is-active' : ''}
+                onClick={() => setTab('discover')}
               >
-                On Your Route
+                Discover
               </button>
             </div>
           )
@@ -48,7 +48,7 @@ export function TripMapScreen() {
         ) : tab === 'itinerary' ? (
           <ItineraryTab />
         ) : (
-          <OnYourRouteTab />
+          <DiscoverTab />
         )}
       </BottomSheet>
 
