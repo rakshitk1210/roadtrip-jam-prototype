@@ -255,13 +255,23 @@ export const SEEDED_STOPS: Place[] = [
   },
 ]
 
+/**
+ * Designed places that exist for real, with the search text that finds them.
+ * Their photographs get replaced by Google's; the sticker art, hand-written
+ * tips and the names on the map all stay as designed.
+ *
+ * The invented ones — Mountain View Café, Sunset Beach BBQ — are deliberately
+ * absent: a text search would match some unrelated business.
+ */
+export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] = [
+  { id: KANGAROO.id, query: 'Outback Kangaroo Farm, Arlington, WA', coord: KANGAROO.coord },
+  { id: 'diablo-lake-hike', query: 'Diablo Lake Trail, North Cascades', coord: [-121.13, 48.714] },
+]
+
 /** Every place that can open the detail sheet, keyed by id. */
 export const PLACES: Record<string, Place> = Object.fromEntries(
   [KANGAROO, ...SAVED, ...SEEDED_STOPS].map((p) => [p.id, p]),
 )
-
-/** Saved places double as the bookmark pins drawn along the route. */
-export const BOOKMARK_PINS = SAVED.map(({ id, coord }) => ({ id, coord }))
 
 /** People on this jam who have already driven some of it. */
 export const FROM_FRIENDS: ListItem[] = [

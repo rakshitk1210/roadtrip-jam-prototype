@@ -1,4 +1,6 @@
 import { createContext, useContext } from 'react'
+import type { Place, SavedPlace } from '../data/places'
+import type { PlaceOverride } from '../data/placesApi'
 
 export type Screen = 'you' | 'trip'
 export type Tab = 'itinerary' | 'discover'
@@ -23,6 +25,13 @@ export interface TripState {
   gems: string[]
   stops: string[]
   toast: string | null
+  /**
+   * Saved places shown in Discover and pinned on the map. Starts as the designed
+   * list and is replaced by real Google Places results when those are available.
+   */
+  discover: SavedPlace[]
+  /** Real photography and ratings layered onto designed places, keyed by id. */
+  overrides: Record<string, PlaceOverride>
 }
 
 export interface TripValue extends TripState {
@@ -37,6 +46,8 @@ export interface TripValue extends TripState {
   toggleGem: (id: string) => void
   clearToast: () => void
   hasGem: (id: string) => boolean
+  /** Resolves any tappable place — designed, seeded, or fetched from Places. */
+  findPlace: (id: string) => Place | undefined
 }
 
 /**

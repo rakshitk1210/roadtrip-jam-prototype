@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "mapbox-gl": "^3.9.3",
+    "@googlemaps/js-api-loader": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/mapbox-gl": "^3.4.1",
+    "@types/google.maps": "^3.65.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

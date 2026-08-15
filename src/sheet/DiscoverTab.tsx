@@ -1,6 +1,6 @@
 import { Icon } from '../components/Icon'
 import { Rating } from '../components/Rating'
-import { FROM_CREATORS, FROM_FRIENDS, SAVED, type ListItem, type SavedPlace } from '../data/places'
+import { FROM_CREATORS, FROM_FRIENDS, type ListItem, type SavedPlace } from '../data/places'
 import { useTrip } from '../state/tripContext'
 
 /** A saved place: tapping the row opens its detail sheet. */
@@ -83,11 +83,13 @@ function TripRow({ item }: { item: ListItem }) {
 }
 
 export function DiscoverTab() {
+  const { discover } = useTrip()
+
   return (
     <div className="sheet-card">
       <section className="list-section">
         <h2 className="section-label">Saved</h2>
-        {SAVED.map((place) => (
+        {discover.map((place) => (
           <PlaceRow key={place.id} place={place} />
         ))}
       </section>

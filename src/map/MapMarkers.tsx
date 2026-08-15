@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import mapboxgl from 'mapbox-gl'
 import type { LngLat, Sticker } from '../data/places'
 import { useTrip } from '../state/tripContext'
+import { createHtmlMarker, type Anchor } from './HtmlMarker'
+import { toLatLng } from './googleMaps'
 
 /**
- * Mounts a React subtree into a `mapboxgl.Marker`, so marker content can read
- * store state (the gem badge) while Mapbox owns the positioning.
+ * Mounts a React subtree into a map overlay, so marker content can read store
+ * state (the gem badge) while Google owns the positioning.
  */
 function Marker({
   map,
@@ -15,10 +16,10 @@ function Marker({
   anchor = 'center',
   children,
 }: {
-  map: mapboxgl.Map
+  map: google.maps.Map
   coord: LngLat
   className: string
-  anchor?: mapboxgl.Anchor
+  anchor?: Anchor
   children: ReactNode
 }) {
   const el = useMemo(() => {
@@ -28,9 +29,10 @@ function Marker({
   }, [className])
 
   useEffect(() => {
-    const marker = new mapboxgl.Marker({ element: el, anchor }).setLngLat(coord).addTo(map)
+    const marker = createHtmlMarker(toLatLng(coord), el, anchor)
+    marker.setMap(map)
     return () => {
-      marker.remove()
+      marker.setMap(null)
     }
   }, [map, el, anchor, coord])
 
@@ -78,7 +80,7 @@ function BookmarkPin({ id }: { id: string }) {
 }
 
 interface Props {
-  map: mapboxgl.Map
+  map: google.maps.Map
   zoom: number
   showPois: boolean
   origin: LngLat
@@ -90,7 +92,7 @@ interface Props {
 }
 
 export function MapMarkers({ map, zoom, showPois, origin, stickers, pins, pois, onStickerClick }: Props) {
-  // Mapbox creates marker elements imperatively; a state flip after mount lets
+  // Overlays create their elements imperatively; a state flip after mount lets
   // the portals render into them on the first paint.
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])

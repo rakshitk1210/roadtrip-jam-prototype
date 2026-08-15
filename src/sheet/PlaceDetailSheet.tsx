@@ -1,6 +1,5 @@
 import { Icon } from '../components/Icon'
 import { Rating } from '../components/Rating'
-import { PLACES } from '../data/places'
 import { useTrip } from '../state/tripContext'
 
 /**
@@ -9,9 +8,10 @@ import { useTrip } from '../state/tripContext'
  * the map, or any saved place from the list.
  */
 export function PlaceDetailSheet({ placeId }: { placeId: string }) {
-  const { closePlace, addStop, addToItinerary, toggleGem, stops, morning, evening, hasGem } = useTrip()
+  const { closePlace, addStop, addToItinerary, toggleGem, stops, morning, evening, hasGem, findPlace } =
+    useTrip()
 
-  const place = PLACES[placeId]
+  const place = findPlace(placeId)
   if (!place) return null
 
   const stopAdded = stops.includes(place.id)

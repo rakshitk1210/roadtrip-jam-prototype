@@ -5,19 +5,7 @@
 }
 
 .map-gl {
-  background: var(--avocado-land);
-}
-
-/* Attribution has to stay visible, so lift it clear of the peeking sheet. */
-.mapboxgl-ctrl-bottom-left {
-  bottom: 96px;
-  z-index: 5;
-}
-
-.mapboxgl-ctrl-logo {
-  opacity: 0.45;
-  transform: scale(0.8);
-  transform-origin: bottom left;
+  background: #e8eaed;
 }
 
 /* Everything except the kangaroo sticker is scenery. */
@@ -181,4 +169,35 @@
 .sticker-sublabel {
   font-size: calc(9px * var(--sticker-scale, 1) + 1px);
   color: var(--ink-secondary);
+}
+
+/* Google injects its own error panel here; the notice below replaces it. */
+.map-gl.is-failed > * {
+  display: none;
+}
+
+/* Shown when Google refuses the key, instead of leaving a blank rectangle. */
+.map-error {
+  position: absolute;
+  /* Just under the category chips: the sheet grows from the bottom, so the top
+     of the map strip is the one spot that stays clear at every snap. */
+  top: 164px;
+  left: 26px;
+  right: 26px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #3c4043;
+}
+
+.map-error p {
+  margin: 0;
+}
+
+.map-error p + p {
+  margin-top: 6px;
+  color: #5f6368;
 }

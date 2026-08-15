@@ -1,12 +1,11 @@
 import { Icon } from '../components/Icon'
 import { Rating } from '../components/Rating'
-import { PLACES } from '../data/places'
 import { useTrip, type ItineraryItem } from '../state/tripContext'
 
 function Row({ item }: { item: ItineraryItem }) {
-  const { hasGem, openPlace } = useTrip()
+  const { hasGem, openPlace, findPlace } = useTrip()
   // Only rows backed by a real place can open a detail sheet.
-  const openable = Boolean(PLACES[item.id])
+  const openable = Boolean(findPlace(item.id))
 
   return (
     <div
