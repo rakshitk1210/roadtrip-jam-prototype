@@ -4,6 +4,7 @@ import App from './App'
 import './styles/tokens.css'
 import './styles/map.css'
 import './styles/ui.css'
+import './styles/inspector.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

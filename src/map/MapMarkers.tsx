@@ -39,10 +39,20 @@ function Marker({
   return createPortal(children, el)
 }
 
-function StickerMarker({ sticker, zoom, onClick }: { sticker: Sticker; zoom: number; onClick?: () => void }) {
+function StickerMarker({
+  sticker,
+  zoom,
+  sizeScale,
+  onClick,
+}: {
+  sticker: Sticker
+  zoom: number
+  sizeScale: number
+  onClick?: () => void
+}) {
   const { hasGem } = useTrip()
   // Stickers grow with zoom so they read like map furniture, not fixed chrome.
-  const scale = Math.min(1.2, Math.max(0.72, 0.72 + (zoom - 8) * 0.12))
+  const scale = Math.min(1.2, Math.max(0.72, 0.72 + (zoom - 8) * 0.12)) * sizeScale
   const width = sticker.width * scale
   const gem = hasGem(sticker.id)
   const left = sticker.labelSide === 'left'
@@ -83,6 +93,9 @@ interface Props {
   map: google.maps.Map
   zoom: number
   showPois: boolean
+  showOrigin?: boolean
+  /** Inspector multiplier on top of the zoom-driven sticker ramp. */
+  stickerScale?: number
   origin: LngLat
   destination: LngLat
   stickers: Sticker[]
@@ -91,7 +104,18 @@ interface Props {
   onStickerClick: (id: string) => void
 }
 
-export function MapMarkers({ map, zoom, showPois, origin, stickers, pins, pois, onStickerClick }: Props) {
+export function MapMarkers({
+  map,
+  zoom,
+  showPois,
+  showOrigin = true,
+  stickerScale = 1,
+  origin,
+  stickers,
+  pins,
+  pois,
+  onStickerClick,
+}: Props) {
   // Overlays create their elements imperatively; a state flip after mount lets
   // the portals render into them on the first paint.
   const [mounted, setMounted] = useState(false)
@@ -100,11 +124,13 @@ export function MapMarkers({ map, zoom, showPois, origin, stickers, pins, pois, 
 
   return (
     <>
-      <Marker map={map} coord={origin} className="mk mk-origin">
-        <div className="origin-dot">
-          <span className="origin-pulse" />
-        </div>
-      </Marker>
+      {showOrigin && (
+        <Marker map={map} coord={origin} className="mk mk-origin">
+          <div className="origin-dot">
+            <span className="origin-pulse" />
+          </div>
+        </Marker>
+      )}
 
       {pins.map((pin) => (
         <Marker key={pin.id} map={map} coord={pin.coord} className="mk mk-pin">
@@ -130,7 +156,12 @@ export function MapMarkers({ map, zoom, showPois, origin, stickers, pins, pois, 
             className="mk mk-sticker"
             anchor={sticker.labelSide === 'left' ? 'right' : 'left'}
           >
-            <StickerMarker sticker={sticker} zoom={zoom} onClick={() => onStickerClick(sticker.id)} />
+            <StickerMarker
+              sticker={sticker}
+              zoom={zoom}
+              sizeScale={stickerScale}
+              onClick={() => onStickerClick(sticker.id)}
+            />
           </Marker>
         ))}
     </>

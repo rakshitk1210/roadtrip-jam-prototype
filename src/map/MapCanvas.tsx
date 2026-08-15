@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import routes from '../data/routes.json'
-import { DESTINATION, EMOJI_POIS, KANGAROO, ORIGIN, POI_ZOOM, STICKERS } from '../data/places'
+import { DESTINATION, EMOJI_POIS, KANGAROO, ORIGIN, STICKERS } from '../data/places'
 import { fetchRoute, orderAlongRoute } from '../data/directions'
 import { useTrip } from '../state/tripContext'
 import { SNAP_FRACTION } from '../sheet/snaps'
 import { loadMaps, offsetCenter, toLatLng, widthForZoom } from './googleMaps'
 import { MapMarkers } from './MapMarkers'
-
-const ROUTE_BLUE = '#1A73E8'
+import { useMapSettings } from '../devtools/mapSettingsContext'
+import { toMapOptions } from '../devtools/mapSettings'
 
 /** Full extent of the jam, used for the opening fit. */
 const ROUTE_BOUNDS: google.maps.LatLngBoundsLiteral = {
@@ -17,27 +17,14 @@ const ROUTE_BOUNDS: google.maps.LatLngBoundsLiteral = {
   north: 48.78,
 }
 
-/** Room for the title row, search field and category chips. */
-const TOP_INSET = 208
-
 /**
- * Strips the basemap back to what the jam is about. Park and business names
- * ("Mount Baker-Snoqualmie National Forest") competed with our own stickers and
- * none of them sit on the route; town names stay so the drive is still readable.
+ * The basemap style, route colours and overlay toggles all live in
+ * `devtools/mapSettings.ts` now, since the inspector edits them live. Its
+ * defaults are what the design ships with.
  *
  * JSON styling only applies while the map has no `mapId` — the same reason
  * `HtmlMarker` uses `OverlayView` instead of `AdvancedMarkerElement`.
  */
-const CLEAN_STYLE: google.maps.MapTypeStyle[] = [
-  // Labels only: the green park geometry is worth keeping, the names are not.
-  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  // `administrative.locality` is deliberately absent — that's the town names.
-  { featureType: 'administrative.land_parcel', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative.neighborhood', stylers: [{ visibility: 'off' }] },
-  { featureType: 'road', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'water', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-]
 
 /** Zoom/width stops carried over from the Mapbox line layers. */
 const CASING_WIDTH: [number, number][] = [
@@ -67,6 +54,11 @@ export function MapCanvas() {
   const [failed, setFailed] = useState(false)
   const [zoom, setZoom] = useState(8)
   const { stops, activePlaceId, openPlace, snap, discover, findPlace } = useTrip()
+  const { settings, reportTilt } = useMapSettings()
+  // The init effect runs once but needs the current settings; a ref keeps it
+  // out of the dependency list.
+  const settingsRef = useRef(settings)
+  settingsRef.current = settings
 
   useEffect(() => {
     if (!container.current || map.current) return
@@ -89,20 +81,16 @@ export function MapCanvas() {
           const m = new Map(container.current, {
             center: { lat: 48.16, lng: -121.77 },
             zoom: 8,
-            styles: CLEAN_STYLE,
+            // `disableDefaultUI` is the baseline; the inspector's individual
+            // control flags are layered on top by `toMapOptions`.
             disableDefaultUI: true,
-            // Google's own POIs would open info windows and fight the stickers.
-            clickableIcons: false,
-            // The sticker scale ramp reads fractional zoom.
-            isFractionalZoomEnabled: true,
-            // One finger pans, which is what a phone prototype wants.
-            gestureHandling: 'greedy',
+            ...toMapOptions(settingsRef.current),
           })
           map.current = m
 
           bottomInset.current = sheetBottom(height, SNAP_FRACTION.peek)
           m.fitBounds(ROUTE_BOUNDS, {
-            top: TOP_INSET,
+            top: settingsRef.current.topInset,
             bottom: bottomInset.current,
             left: 26,
             right: 26,
@@ -126,30 +114,32 @@ export function MapCanvas() {
             }
 
             const path = routes.direct.coordinates.map(toLatLng)
+            const scale = settingsRef.current.lineScale
             casing.current = new Polyline({
               path,
               map: m,
-              strokeColor: '#FFFFFF',
+              strokeColor: settingsRef.current.casingColor,
               strokeOpacity: 0.9,
-              strokeWeight: widthForZoom(8, CASING_WIDTH),
+              strokeWeight: widthForZoom(8, CASING_WIDTH) * scale,
               zIndex: 1,
             })
             line.current = new Polyline({
               path,
               map: m,
-              strokeColor: ROUTE_BLUE,
-              strokeWeight: widthForZoom(8, LINE_WIDTH),
+              strokeColor: settingsRef.current.routeColor,
+              strokeWeight: widthForZoom(8, LINE_WIDTH) * scale,
               zIndex: 2,
             })
 
             m.addListener('zoom_changed', () => {
               const z = m.getZoom() ?? 8
               setZoom(z)
+              const weight = settingsRef.current.lineScale
               casing.current?.setOptions({
-                strokeWeight: widthForZoom(z, CASING_WIDTH),
+                strokeWeight: widthForZoom(z, CASING_WIDTH) * weight,
               })
               line.current?.setOptions({
-                strokeWeight: widthForZoom(z, LINE_WIDTH),
+                strokeWeight: widthForZoom(z, LINE_WIDTH) * weight,
               })
             })
 
@@ -175,6 +165,26 @@ export function MapCanvas() {
       map.current = null
     }
   }, [])
+
+  // Everything the inspector changes, pushed to the live map. Tilt is read back
+  // because a raster map silently ignores it, and the sidebar says so.
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+
+    m.setOptions({ disableDefaultUI: true, ...toMapOptions(settings) })
+    reportTilt(m.getTilt() ?? null)
+
+    const z = m.getZoom() ?? 8
+    casing.current?.setOptions({
+      strokeColor: settings.casingColor,
+      strokeWeight: widthForZoom(z, CASING_WIDTH) * settings.lineScale,
+    })
+    line.current?.setOptions({
+      strokeColor: settings.routeColor,
+      strokeWeight: widthForZoom(z, LINE_WIDTH) * settings.lineScale,
+    })
+  }, [settings, ready, reportTilt])
 
   // "Add stop" re-draws the route through the stops, in driving order. The two
   // cached geometries cover the common cases instantly; anything else asks
@@ -239,8 +249,8 @@ export function MapCanvas() {
     bottomInset.current = next
 
     const center = toLatLng(place.coord)
-    m.panTo(offsetCenter(m, center, 0, (next - TOP_INSET) / 2) ?? center)
-  }, [activePlaceId, ready, findPlace])
+    m.panTo(offsetCenter(m, center, 0, (next - settings.topInset) / 2) ?? center)
+  }, [activePlaceId, ready, findPlace, settings.topInset])
 
   return (
     <div className="map-canvas">
@@ -259,13 +269,15 @@ export function MapCanvas() {
         <MapMarkers
           map={map.current}
           zoom={zoom}
-          showPois={zoom >= POI_ZOOM}
+          showPois={settings.showPois && zoom >= settings.poiZoom}
+          showOrigin={settings.showOrigin}
+          stickerScale={settings.stickerScale}
           origin={ORIGIN}
           destination={DESTINATION}
-          stickers={STICKERS}
+          stickers={settings.showStickers ? STICKERS : []}
           // Pins follow whatever Discover is showing, so real places land on
           // their real coordinates and gems key off the same ids.
-          pins={discover.map(({ id, coord }) => ({ id, coord }))}
+          pins={settings.showPins ? discover.map(({ id, coord }) => ({ id, coord })) : []}
           pois={EMOJI_POIS}
           onStickerClick={openPlace}
         />
