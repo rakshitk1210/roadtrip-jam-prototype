@@ -27,12 +27,8 @@
   --avocado-road: #ebf4a4;
   --route-blue: #1a73e8;
 
-  /*
-   * `Day n` headings are Google blue in the design whatever colour that day's
-   * leg of the route draws in — those live in `map/dayColors.ts`, since the
-   * polylines need them as strings.
-   */
-  --day-label: #4285f4;
+  /* Per-day colours live in `styles/dayColors.ts`: the map needs them as
+     strings, which a custom property here could not supply. */
 
   --shadow-sheet: 0 4px 24px rgba(0, 0, 0, 0.12);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);

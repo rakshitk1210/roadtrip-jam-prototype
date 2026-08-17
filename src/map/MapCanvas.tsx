@@ -4,7 +4,7 @@ import { DESTINATION, EMOJI_POIS, KANGAROO, ORIGIN, STICKERS, type LngLat } from
 import { fetchRoute, orderAlongRoute } from '../data/directions'
 import { useTrip } from '../state/tripContext'
 import { SNAP_FRACTION } from '../sheet/snaps'
-import { dayColor } from './dayColors'
+import { dayColor } from '../styles/dayColors'
 import { loadMaps, offsetCenter, toLatLng, widthForZoom } from './googleMaps'
 import { MapMarkers } from './MapMarkers'
 import { useMapSettings } from '../devtools/mapSettingsContext'

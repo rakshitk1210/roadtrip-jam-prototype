@@ -73,7 +73,8 @@ export function TripMapScreen() {
       {selection.selecting && onItinerary && <SelectActionBar selection={selection} />}
       {!detailOpen && !selection.selecting && <TabPill tab={tab} setTab={setTab} />}
 
-      {toast && <div className="toast">{toast}</div>}
+      {/* One of the two bottom overlays is always up unless a place is open. */}
+      {toast && <div className={`toast${detailOpen ? '' : ' is-raised'}`}>{toast}</div>}
     </div>
   )
 }

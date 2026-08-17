@@ -127,7 +127,7 @@ export const DEFAULT_SETTINGS: MapSettings = {
    * added bottom inset: without the extra padding here, that pan carries the
    * destination and its sticker off the top of the screen.
    */
-  topInset: 260,
+  topInset: 310,
 }
 
 /**

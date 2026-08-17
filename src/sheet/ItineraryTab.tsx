@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { MetaLine } from '../components/MetaLine'
 import { useTrip, type ItineraryItem } from '../state/tripContext'
+import { dayColor } from '../styles/dayColors'
 import { useReorder } from './useReorder'
 
 /**
@@ -226,8 +227,13 @@ export function ItineraryTab({ selection }: { selection: Selection }) {
           >
             {day.labelled && (
               /* Reordering days is ours, not the design's — the heading is the
-                 grab affordance, since there is no handle drawn for it. */
-              <h2 className="day-label" {...(selection.selecting ? {} : dayDrag.handleProps(dayIndex))}>
+                 grab affordance, since there is no handle drawn for it. The
+                 colour is the day's own, matching its leg of the route. */
+              <h2
+                className="day-label"
+                style={{ color: dayColor(dayIndex) }}
+                {...(selection.selecting ? {} : dayDrag.handleProps(dayIndex))}
+              >
                 <Icon name="drag_indicator" size={16} />
                 Day {number}
               </h2>
