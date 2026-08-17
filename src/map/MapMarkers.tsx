@@ -99,6 +99,8 @@ interface Props {
   origin: LngLat
   destination: LngLat
   stickers: Sticker[]
+  /** Itinerary stops, each carrying the colour of the day it belongs to. */
+  stops: { id: string; coord: LngLat; color: string }[]
   pins: { id: string; coord: LngLat }[]
   pois: { id: string; emoji: string; coord: LngLat }[]
   onStickerClick: (id: string) => void
@@ -112,6 +114,7 @@ export function MapMarkers({
   stickerScale = 1,
   origin,
   stickers,
+  stops,
   pins,
   pois,
   onStickerClick,
@@ -135,6 +138,15 @@ export function MapMarkers({
       {pins.map((pin) => (
         <Marker key={pin.id} map={map} coord={pin.coord} className="mk mk-pin">
           <BookmarkPin id={pin.id} />
+        </Marker>
+      ))}
+
+      {/* After the pins: every marker shares one overlay pane, so document order
+          is what decides which wins where a saved place is also a stop. The day
+          colours are the point of this map, so they sit on top. */}
+      {stops.map((stop) => (
+        <Marker key={stop.id} map={map} coord={stop.coord} className="mk mk-stop">
+          <span className="stop-dot" style={{ background: stop.color }} />
         </Marker>
       ))}
 

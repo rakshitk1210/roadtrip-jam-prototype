@@ -9,7 +9,11 @@
   --surface: #ffffff;
   --surface-dim: #f1f3f4;
   --surface-panel: #f8f8f8;
+  --surface-nav: #eef2f6;
+  --surface-hairline: #e8eaed;
   --drag-handle: #c4c7c5;
+
+  --red-destructive: #d93025;
 
   /* Cyan — the Roadtrip Jam action colour */
   --cyan-on: #073b41;
@@ -22,6 +26,13 @@
   --avocado-water: #aee2e0;
   --avocado-road: #ebf4a4;
   --route-blue: #1a73e8;
+
+  /*
+   * `Day n` headings are Google blue in the design whatever colour that day's
+   * leg of the route draws in — those live in `map/dayColors.ts`, since the
+   * polylines need them as strings.
+   */
+  --day-label: #4285f4;
 
   --shadow-sheet: 0 4px 24px rgba(0, 0, 0, 0.12);
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);

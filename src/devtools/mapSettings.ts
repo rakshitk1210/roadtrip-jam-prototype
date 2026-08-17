@@ -121,7 +121,13 @@ export const DEFAULT_SETTINGS: MapSettings = {
   showOrigin: true,
   stickerScale: 1,
   poiZoom: 11.5,
-  topInset: 208,
+  /**
+   * Top padding for the opening fit. Larger than the title row it clears,
+   * because raising the sheet to its resting snap pans the camera up by half the
+   * added bottom inset: without the extra padding here, that pan carries the
+   * destination and its sticker off the top of the screen.
+   */
+  topInset: 260,
 }
 
 /**

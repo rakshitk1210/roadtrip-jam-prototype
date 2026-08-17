@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import routes from '../data/routes.json'
-import { DESTINATION, EMOJI_POIS, KANGAROO, ORIGIN, STICKERS } from '../data/places'
+import { DESTINATION, EMOJI_POIS, KANGAROO, ORIGIN, STICKERS, type LngLat } from '../data/places'
 import { fetchRoute, orderAlongRoute } from '../data/directions'
 import { useTrip } from '../state/tripContext'
 import { SNAP_FRACTION } from '../sheet/snaps'
+import { dayColor } from './dayColors'
 import { loadMaps, offsetCenter, toLatLng, widthForZoom } from './googleMaps'
 import { MapMarkers } from './MapMarkers'
 import { useMapSettings } from '../devtools/mapSettingsContext'
@@ -40,12 +41,54 @@ const LINE_WIDTH: [number, number][] = [
 
 const sheetBottom = (height: number, fraction: number) => height * fraction + 24
 
+/**
+ * Vertex on the route closest to a stop. Planar distance is enough to rank
+ * candidates over one state's worth of latitude.
+ */
+function nearestVertex(path: number[][], [lng, lat]: LngLat) {
+  let best = 0
+  let nearest = Infinity
+  path.forEach(([x, y], i) => {
+    const d = (x - lng) ** 2 + (y - lat) ** 2
+    if (d < nearest) {
+      nearest = d
+      best = i
+    }
+  })
+  return best
+}
+
+/**
+ * Cuts the route where each day ends, so every day's driving draws in its own
+ * colour. Segments share the vertex they meet at, or the line would show gaps.
+ *
+ * A day is cut at whichever of its stops sits furthest along the road, not at
+ * the last one listed: days are ordered by when you visit them, and the seeded
+ * trip visits the Kangaroo Farm before doubling back into Seattle. Cutting at
+ * the last row would collapse that day's leg to a few city blocks.
+ */
+function splitByDay(path: number[][], cuts: LngLat[][], colors: string[]) {
+  const at = cuts
+    .map((day) => day.reduce((furthest, c) => Math.max(furthest, nearestVertex(path, c)), 0))
+    .sort((a, b) => a - b)
+  const segments: { path: number[][]; color: string }[] = []
+
+  let start = 0
+  at.forEach((end, i) => {
+    if (end > start) segments.push({ path: path.slice(start, end + 1), color: colors[i] })
+    start = Math.max(start, end)
+  })
+  segments.push({ path: path.slice(start), color: colors[at.length] })
+
+  return segments.filter((s) => s.path.length > 1)
+}
+
 /** Everything on the trip screen that lives in map space. */
 export function MapCanvas() {
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<google.maps.Map | null>(null)
-  const casing = useRef<google.maps.Polyline | null>(null)
-  const line = useRef<google.maps.Polyline | null>(null)
+  /** One casing + line pair per day of the route. */
+  const drawn = useRef<{ casing: google.maps.Polyline; line: google.maps.Polyline }[]>([])
   /** Bottom padding the camera is currently composed for, so snaps pan by the delta. */
   const bottomInset = useRef(0)
   /** Mirrors `failed` for reads inside Google callbacks, which miss state updates. */
@@ -53,7 +96,8 @@ export function MapCanvas() {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
   const [zoom, setZoom] = useState(8)
-  const { stops, activePlaceId, openPlace, snap, discover, findPlace } = useTrip()
+  const [path, setPath] = useState<number[][]>(routes.direct.coordinates)
+  const { stops, activePlaceId, openPlace, snap, discover, findPlace, itinerary } = useTrip()
   const { settings, reportTilt } = useMapSettings()
   // The init effect runs once but needs the current settings; a ref keeps it
   // out of the dependency list.
@@ -73,7 +117,7 @@ export function MapCanvas() {
     }
 
     loadMaps()
-      .then(({ Map, Polyline }) => {
+      .then(({ Map }) => {
         if (cancelled || !container.current) return
 
         try {
@@ -113,36 +157,7 @@ export function MapCanvas() {
               return
             }
 
-            const path = routes.direct.coordinates.map(toLatLng)
-            const scale = settingsRef.current.lineScale
-            casing.current = new Polyline({
-              path,
-              map: m,
-              strokeColor: settingsRef.current.casingColor,
-              strokeOpacity: 0.9,
-              strokeWeight: widthForZoom(8, CASING_WIDTH) * scale,
-              zIndex: 1,
-            })
-            line.current = new Polyline({
-              path,
-              map: m,
-              strokeColor: settingsRef.current.routeColor,
-              strokeWeight: widthForZoom(8, LINE_WIDTH) * scale,
-              zIndex: 2,
-            })
-
-            m.addListener('zoom_changed', () => {
-              const z = m.getZoom() ?? 8
-              setZoom(z)
-              const weight = settingsRef.current.lineScale
-              casing.current?.setOptions({
-                strokeWeight: widthForZoom(z, CASING_WIDTH) * weight,
-              })
-              line.current?.setOptions({
-                strokeWeight: widthForZoom(z, LINE_WIDTH) * weight,
-              })
-            })
-
+            m.addListener('zoom_changed', () => setZoom(m.getZoom() ?? 8))
             setZoom(m.getZoom() ?? 8)
             setReady(true)
           })
@@ -158,10 +173,6 @@ export function MapCanvas() {
 
     return () => {
       cancelled = true
-      casing.current?.setMap(null)
-      line.current?.setMap(null)
-      casing.current = null
-      line.current = null
       map.current = null
     }
   }, [])
@@ -174,28 +185,104 @@ export function MapCanvas() {
 
     m.setOptions({ disableDefaultUI: true, ...toMapOptions(settings) })
     reportTilt(m.getTilt() ?? null)
-
-    const z = m.getZoom() ?? 8
-    casing.current?.setOptions({
-      strokeColor: settings.casingColor,
-      strokeWeight: widthForZoom(z, CASING_WIDTH) * settings.lineScale,
-    })
-    line.current?.setOptions({
-      strokeColor: settings.routeColor,
-      strokeWeight: widthForZoom(z, LINE_WIDTH) * settings.lineScale,
-    })
   }, [settings, ready, reportTilt])
+
+  /**
+   * The stops belonging to each day, and what colour that day draws in. The
+   * ungrouped tail keeps the plain route colour, so only planned days are
+   * distinguished.
+   */
+  const days = useMemo(() => {
+    const filled = itinerary.filter((d) => d.items.length > 0)
+    const labelled = filled.filter((d) => d.labelled)
+    const hasTail = filled.some((d) => !d.labelled)
+
+    return {
+      cuts: labelled.map((d) => d.items),
+      colors: [
+        ...labelled.map((_, i) => dayColor(i)),
+        // Whatever is left after the last day: the tail, or that same day
+        // running on to the destination.
+        hasTail || labelled.length === 0
+          ? settings.routeColor
+          : dayColor(labelled.length - 1),
+      ],
+    }
+  }, [itinerary, settings.routeColor])
+
+  // Route legs. Redrawn rather than mutated, since the number of days changes.
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+
+    const cuts = days.cuts.map((items) =>
+      items.flatMap((item) => {
+        const place = findPlace(item.id)
+        return place ? [place.coord] : []
+      }),
+    )
+    const scale = settings.lineScale
+    const z = m.getZoom() ?? 8
+
+    const created = splitByDay(path, cuts, days.colors).map(({ path: leg, color }) => {
+      const latLngs = leg.map(toLatLng)
+      return {
+        casing: new google.maps.Polyline({
+          path: latLngs,
+          map: m,
+          strokeColor: settings.casingColor,
+          strokeOpacity: 0.9,
+          strokeWeight: widthForZoom(z, CASING_WIDTH) * scale,
+          zIndex: 1,
+        }),
+        line: new google.maps.Polyline({
+          path: latLngs,
+          map: m,
+          strokeColor: color,
+          strokeWeight: widthForZoom(z, LINE_WIDTH) * scale,
+          zIndex: 2,
+        }),
+      }
+    })
+    drawn.current = created
+
+    return () => {
+      for (const { casing, line } of created) {
+        casing.setMap(null)
+        line.setMap(null)
+      }
+      drawn.current = []
+    }
+  }, [ready, path, days, findPlace, settings.casingColor, settings.lineScale])
+
+  // A dot on every planned stop, in its day's colour. Coordinates come from the
+  // resolved place, so a stop hydrated from Places sits on its real listing.
+  const dayStops = useMemo(() => {
+    let index = -1
+    return itinerary.flatMap((day) => {
+      if (day.labelled) index += 1
+      const color = day.labelled ? dayColor(index) : settings.routeColor
+      return day.items.flatMap((item) => {
+        const place = findPlace(item.id)
+        return place ? [{ id: item.id, coord: place.coord, color }] : []
+      })
+    })
+  }, [itinerary, findPlace, settings.routeColor])
+
+  // Stroke widths track zoom, so the route stays legible without redrawing.
+  useEffect(() => {
+    const scale = settings.lineScale
+    for (const { casing, line } of drawn.current) {
+      casing.setOptions({ strokeWeight: widthForZoom(zoom, CASING_WIDTH) * scale })
+      line.setOptions({ strokeWeight: widthForZoom(zoom, LINE_WIDTH) * scale })
+    }
+  }, [zoom, settings.lineScale])
 
   // "Add stop" re-draws the route through the stops, in driving order. The two
   // cached geometries cover the common cases instantly; anything else asks
   // Routes and falls back to the direct line if that call fails.
   useEffect(() => {
     if (!ready) return
-    const setPath = (coordinates: number[][]) => {
-      const path = coordinates.map(toLatLng)
-      casing.current?.setPath(path)
-      line.current?.setPath(path)
-    }
 
     if (stops.length === 0) {
       setPath(routes.direct.coordinates)
@@ -275,6 +362,7 @@ export function MapCanvas() {
           origin={ORIGIN}
           destination={DESTINATION}
           stickers={settings.showStickers ? STICKERS : []}
+          stops={dayStops}
           // Pins follow whatever Discover is showing, so real places land on
           // their real coordinates and gems key off the same ids.
           pins={settings.showPins ? discover.map(({ id, coord }) => ({ id, coord })) : []}

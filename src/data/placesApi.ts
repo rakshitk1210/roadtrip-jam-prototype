@@ -250,12 +250,18 @@ export async function discoverAlongRoute(): Promise<SavedPlace[] | null> {
 /** Real imagery and ratings layered onto a place we authored by hand. */
 export interface PlaceOverride {
   photos: [string, string, string]
-  rating: number
-  reviews: number
+  /**
+   * Absent when Google has no score for the listing — a neighbourhood or a park
+   * rather than a business. Callers keep the authored rating in that case, so a
+   * row never reads `0 ★ (0)`.
+   */
+  rating?: number
+  reviews?: number
 }
 
-// v2 re-resolves Kona Kitchen against its exact Seattle listing.
-const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v2'
+// v4 adds the real listings behind the redesigned itinerary's stops, and stops
+// caching a zero rating for the ones Google doesn't score.
+const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v4'
 
 /**
  * Looks a designed place up by name and pulls its real photographs. The Kangaroo
@@ -292,8 +298,8 @@ async function lookupByText(
 
   return {
     photos: [urls[0], urls[1] ?? urls[0], urls[2] ?? urls[0]],
-    rating: hit.rating ?? 0,
-    reviews: hit.userRatingCount ?? 0,
+    ...(hit.rating === undefined ? {} : { rating: hit.rating }),
+    ...(hit.userRatingCount === undefined ? {} : { reviews: hit.userRatingCount }),
   }
 }
 

@@ -8,14 +8,14 @@ import { useTrip } from '../state/tripContext'
  * the map, or any saved place from the list.
  */
 export function PlaceDetailSheet({ placeId }: { placeId: string }) {
-  const { closePlace, addStop, addToItinerary, toggleGem, stops, morning, evening, hasGem, findPlace } =
+  const { closePlace, addStop, addToItinerary, toggleGem, stops, inItinerary, hasGem, findPlace } =
     useTrip()
 
   const place = findPlace(placeId)
   if (!place) return null
 
   const stopAdded = stops.includes(place.id)
-  const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
+  const planned = inItinerary(place.id)
   const gem = hasGem(place.id)
 
   return (
@@ -41,12 +41,12 @@ export function PlaceDetailSheet({ placeId }: { placeId: string }) {
           {stopAdded ? 'Stop added' : 'Add stop'}
         </button>
         <button
-          className={`pill pill-soft${inItinerary ? ' is-done' : ''}`}
+          className={`pill pill-soft${planned ? ' is-done' : ''}`}
           onClick={() => addToItinerary(place.id)}
-          disabled={inItinerary}
+          disabled={planned}
         >
           <Icon name="add" />
-          {inItinerary ? 'In itinerary' : 'Add to itinerary'}
+          {planned ? 'In itinerary' : 'Add to itinerary'}
         </button>
         <button
           className={`pill pill-soft${gem ? ' is-gem' : ''}`}

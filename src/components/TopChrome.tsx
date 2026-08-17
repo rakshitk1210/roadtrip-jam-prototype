@@ -1,13 +1,6 @@
 import { Icon } from './Icon'
 import { useTrip } from '../state/tripContext'
 
-const CHIPS = [
-  { icon: 'restaurant', label: 'Restaurants' },
-  { icon: 'local_cafe', label: 'Coffee' },
-  { icon: 'shopping_bag', label: 'Shopping' },
-  { icon: 'icecream', label: 'Desserts' },
-]
-
 /** Four overlapping faces, positioned exactly as in the Figma avatar cluster. */
 const TOPBAR_AVATARS = [
   { src: '/assets/topbar-av-1.jpg', size: 20.9, left: 2, top: 7 },
@@ -16,7 +9,10 @@ const TOPBAR_AVATARS = [
   { src: '/assets/topbar-av-4.jpg', size: 12.4, left: 24.1, top: 17.2 },
 ]
 
-/** Title row, AI search field and category chips. */
+/**
+ * Back, trip name and who is on it. The redesign drops the AI search field and
+ * the category chip row that used to sit under this, so the map shows through.
+ */
 export function TopChrome() {
   const { backToYou } = useTrip()
 
@@ -37,27 +33,6 @@ export function TopChrome() {
             />
           ))}
         </div>
-      </div>
-
-      <div className="search-row">
-        <div className="search-field">
-          <span className="ai-orb">
-            <img src="/assets/ic-google-ai.svg" alt="" width={16} height={16} />
-          </span>
-          <span className="search-placeholder">
-            <Icon name="search" />
-            Vegan restaurants
-          </span>
-        </div>
-      </div>
-
-      <div className="chip-row">
-        {CHIPS.map((c) => (
-          <span className="chip" key={c.label}>
-            <Icon name={c.icon} size={16} />
-            {c.label}
-          </span>
-        ))}
       </div>
     </div>
   )

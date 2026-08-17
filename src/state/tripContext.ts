@@ -12,6 +12,26 @@ export interface ItineraryItem {
   rating: number
   reviews: number
   photo: string
+  /** Detour off the route, in miles — the `1.5 mi` on an itinerary row. */
+  distanceMi?: number
+}
+
+/**
+ * One block of the itinerary. Labelled blocks carry a `Day n` heading; the one
+ * unlabelled block is the tail that new stops land in until they're grouped.
+ * The day number is derived from position rather than stored, so reordering
+ * days renumbers them with nothing left to keep in sync.
+ */
+export interface ItineraryDay {
+  id: string
+  labelled: boolean
+  items: ItineraryItem[]
+}
+
+/** Where a stop sits: which block, and how far down it. */
+export interface ItemSpot {
+  dayId: string
+  index: number
 }
 
 export interface TripState {
@@ -20,8 +40,8 @@ export interface TripState {
   snap: Snap
   /** Non-null while the place detail sheet is up. */
   activePlaceId: string | null
-  morning: ItineraryItem[]
-  evening: ItineraryItem[]
+  /** Labelled days first, the unlabelled tail always last. */
+  itinerary: ItineraryDay[]
   gems: string[]
   stops: string[]
   toast: string | null
@@ -48,6 +68,14 @@ export interface TripValue extends TripState {
   hasGem: (id: string) => boolean
   /** Resolves any tappable place — designed, seeded, or fetched from Places. */
   findPlace: (id: string) => Place | undefined
+  /** Reorders a stop, within its block or into another one. */
+  moveItem: (from: ItemSpot, to: ItemSpot) => void
+  /** Reorders whole days. Indices count labelled days only. */
+  moveDay: (fromIndex: number, toIndex: number) => void
+  /** Pulls the given stops out of wherever they sit into a new labelled day. */
+  groupIntoDay: (ids: string[]) => void
+  removeItems: (ids: string[]) => void
+  inItinerary: (id: string) => boolean
 }
 
 /**

@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
-import { Rating } from '../components/Rating'
+import { MetaLine } from '../components/MetaLine'
 import {
   CURATED_HERO,
   CURATED_RAIL,
   DISCOVER_CATEGORIES,
   SAVED_QUOTE,
   type CuratedCard,
-  type Place,
   type SavedPlace,
 } from '../data/places'
 import { useTrip } from '../state/tripContext'
@@ -29,42 +28,10 @@ function CategoryChips() {
   )
 }
 
-/** The `4.8 ★ (198) · 1.5 mi · Lake` line under a place name. */
-function MetaLine({
-  place,
-  gem = false,
-  onDark = false,
-}: {
-  place: SavedPlace | Place
-  gem?: boolean
-  onDark?: boolean
-}) {
-  const distance = 'distanceMi' in place ? place.distanceMi : undefined
-  const category = 'category' in place ? place.category : undefined
-
-  return (
-    <div className={`meta-line${onDark ? ' is-on-dark' : ''}`}>
-      <Rating rating={place.rating} reviews={place.reviews} gem={gem} compact />
-      {distance !== undefined && (
-        <>
-          <span className="meta-dot">•</span>
-          <span>{distance} mi</span>
-        </>
-      )}
-      {category && (
-        <>
-          <span className="meta-dot">•</span>
-          <span className="meta-category">{category}</span>
-        </>
-      )}
-    </div>
-  )
-}
-
 /** A saved place: tapping the row opens its detail sheet. */
 function SavedRow({ place, quote }: { place: SavedPlace; quote?: typeof SAVED_QUOTE }) {
-  const { openPlace, addToItinerary, morning, evening, hasGem } = useTrip()
-  const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
+  const { openPlace, addToItinerary, inItinerary: isPlanned, hasGem } = useTrip()
+  const inItinerary = isPlanned(place.id)
 
   return (
     <div
@@ -115,11 +82,11 @@ function SavedRow({ place, quote }: { place: SavedPlace; quote?: typeof SAVED_QU
 
 /** A photo card in the curated section — the hero is the same thing, wider. */
 function CuratedTile({ card, hero = false }: { card: CuratedCard; hero?: boolean }) {
-  const { findPlace, openPlace, addToItinerary, morning, evening } = useTrip()
+  const { findPlace, openPlace, addToItinerary, inItinerary: isPlanned } = useTrip()
   const place = findPlace(card.placeId)
   if (!place) return null
 
-  const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
+  const inItinerary = isPlanned(place.id)
 
   return (
     <div

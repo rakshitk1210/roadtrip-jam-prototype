@@ -68,38 +68,34 @@ export const STICKERS: Sticker[] = [
     width: 46,
     interactive: true,
   },
+  // The three below use the design's own artwork, exported from the Figma frame
+  // rather than linked: its asset URLs expire after about a week.
   {
-    id: 'north-cascades',
-    label: 'North Cascades',
-    image: '/assets/sticker-north-cascades.png',
+    id: 'north-cascades-park',
+    label: 'North Cascades National Park',
+    image: '/assets/sticker-lake-diablo.svg',
     coord: DESTINATION,
-    width: 48,
+    width: 40,
+    labelSide: 'left',
+  },
+  // Ladder Creek Falls and the kayak put-in both really sit within a few miles
+  // of Newhalem, where their labels would land on top of the park's. They are
+  // spaced out along the SR-20 leg instead, which is how the design frame reads
+  // them: four stickers strung along the route rather than a cluster at the end.
+  {
+    id: 'ladder-creek-falls',
+    label: 'Ladder Creek Falls',
+    image: '/assets/sticker-ladder-creek.svg',
+    coord: [-121.7365, 48.5385], // Concrete, on SR-20
+    width: 38,
     labelSide: 'left',
   },
   {
-    id: 'mount-baker',
-    label: 'Mount Baker',
-    image: '/assets/sticker-mount-baker.png',
-    coord: [-121.8144, 48.7767],
-    width: 42,
-    minZoom: 8.5,
-    labelSide: 'left',
-  },
-  {
-    id: 'oak-tree',
-    label: 'The big oak tree',
-    image: '/assets/sticker-oak-tree.png',
-    coord: [-122.0574, 48.2492],
-    width: 44,
-    minZoom: 10,
-  },
-  {
-    id: 'wildflower',
-    label: 'Wildflower farm',
-    image: '/assets/sticker-wildflower.png',
-    coord: [-122.0891, 48.1735],
-    width: 48,
-    minZoom: 10,
+    id: 'north-cascades-kayaks',
+    label: 'North Cascades Kayaks',
+    image: '/assets/sticker-kayak.svg',
+    coord: [-122.36, 48.4], // The Skagit, on the I-5 leg before the turn east
+    width: 46,
   },
 ]
 
@@ -218,34 +214,110 @@ export const SAVED: SavedPlace[] = [
   },
 ]
 
-/** The two stops the itinerary starts with, so those rows open a sheet too. */
+/**
+ * The eight stops the itinerary opens with, in the design's order, so every row
+ * opens a detail sheet. Seven are real listings whose ratings and photographs
+ * get replaced by Google's; only Café Mondo is invented, and it keeps what is
+ * authored here. The Kangaroo Zoo is `KANGAROO`, reused rather than restated.
+ */
 export const SEEDED_STOPS: Place[] = [
   {
-    id: 'silver-stream',
-    name: 'Silver Stream Trail',
-    hours: 'Open sunrise to sunset',
-    rating: 4.8,
-    reviews: 198,
-    coord: [-121.6294, 48.5423], // Rockport, off SR-20
+    id: 'u-district',
+    name: 'U-district',
+    hours: 'Open 24 hours',
+    rating: 4.6,
+    reviews: 1204,
+    coord: [-122.3139, 47.6608], // University Way NE at NE 45th
     thumb: LAKE,
     photos: [LAKE, PADDLER, KAYAK],
     knowBeforeYouGo: [
-      'Two creek crossings with no bridge — waterproof boots or a spare pair of socks',
-      'The trailhead has no cell signal, so download the map before you turn off SR-20',
+      'The Ave is where the group eats before the drive — cheap, fast, and open early',
+      'Street parking flips to permit-only at 8am on weekdays, so use the garage on 41st',
+    ],
+  },
+  KANGAROO,
+  {
+    id: 'cafe-mondo',
+    name: 'Café Mondo',
+    hours: 'Opens 7:00am Thu',
+    rating: 4.7,
+    reviews: 342,
+    coord: [-122.383, 47.6685], // Ballard, on the way out of the city
+    thumb: PADDLER,
+    photos: [PADDLER, KAYAK, LAKE],
+    knowBeforeYouGo: [
+      'Order at the counter, then take it to the window seats facing the ship canal',
+      'They stop making the breakfast pizza at 11, and it is the reason to stop here',
     ],
   },
   {
-    id: 'kayak-rental',
-    name: 'Kayak rental',
-    hours: 'Opens 9:00am Thu',
-    rating: 4.8,
-    reviews: 198,
-    coord: [-121.9412, 48.5218], // Baker Lake turn-off
+    id: 'north-cascades',
+    name: 'North Cascades',
+    hours: 'Open 24 hours',
+    rating: 4.9,
+    reviews: 890,
+    coord: DESTINATION,
+    thumb: LAKE,
+    photos: [LAKE, KAYAK, PADDLER],
+    knowBeforeYouGo: [
+      'No fuel between Marblemount and Winthrop — fill up before you commit to SR-20',
+      'Cell coverage stops at the park boundary, so download the map while you still can',
+    ],
+  },
+  {
+    id: 'fremont-market',
+    name: 'The Fremont Market',
+    hours: 'Sundays 10:00am – 4:00pm',
+    rating: 4.5,
+    reviews: 612,
+    coord: [-122.3496, 47.6497], // 3401 Evanston Ave N
+    thumb: KAYAK,
+    photos: [KAYAK, LAKE, PADDLER],
+    knowBeforeYouGo: [
+      'Sunday only, and the vintage stalls at the north end sell out first',
+      'Most vendors take cards, but the food carts are still happier with cash',
+    ],
+  },
+  {
+    id: 'alki-beach',
+    name: 'Alki Beach Park',
+    hours: 'Open 4:00am – 11:30pm',
+    rating: 4.7,
+    reviews: 2318,
+    coord: [-122.4106, 47.5812], // West Seattle
+    thumb: KAYAK,
+    photos: [KAYAK, PADDLER, LAKE],
+    knowBeforeYouGo: [
+      'The skyline view is from the east end of the beach, not the middle',
+      'Parking along Alki Ave fills from noon on any clear day',
+    ],
+  },
+  {
+    id: 'chihuly-garden',
+    name: 'Chihuly Garden and Glass',
+    hours: 'Opens 10:00am Thu',
+    rating: 4.6,
+    reviews: 1876,
+    coord: [-122.3502, 47.6205], // Seattle Center
     thumb: PADDLER,
     photos: [PADDLER, LAKE, KAYAK],
     knowBeforeYouGo: [
-      'Last rental goes out two hours before dusk, and they hold it strictly',
-      'Life jackets are included; dry bags are not, so bring your own',
+      'Timed entry is booked online and the last slot is 45 minutes before closing',
+      'The glasshouse is the shot — go late in the day when the light drops through it',
+    ],
+  },
+  {
+    id: 'gas-works-park',
+    name: 'Gas Works Park',
+    hours: 'Open 4:00am – 11:30pm',
+    rating: 4.7,
+    reviews: 1442,
+    coord: [-122.3343, 47.6456], // North shore of Lake Union
+    thumb: LAKE,
+    photos: [LAKE, PADDLER, KAYAK],
+    knowBeforeYouGo: [
+      'Kite Hill is the whole point, and it is windier at the top than it looks',
+      'The old cracking towers are fenced off — the play barn is the part you can walk into',
     ],
   },
 ]
@@ -291,13 +363,19 @@ export const CURATED_PLACES: Place[] = [
  * Their photographs get replaced by Google's; the sticker art, hand-written
  * tips and the names on the map all stay as designed.
  *
- * The invented ones — Mountain View Café, Sunset Beach BBQ — are deliberately
- * absent: a text search would match some unrelated business.
+ * The invented ones — Mountain View Café, Sunset Beach BBQ, Café Mondo — are
+ * deliberately absent: a text search would match some unrelated business.
  */
 export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] = [
   { id: KANGAROO.id, query: 'Outback Kangaroo Farm, Arlington, WA', coord: KANGAROO.coord },
   { id: 'diablo-lake-hike', query: 'Diablo Lake Trail, North Cascades', coord: [-121.13, 48.714] },
   { id: 'kona-kitchen', query: 'Kona Kitchen - Seattle', coord: [-122.3233564, 47.6906269] },
+  { id: 'u-district', query: 'University District, Seattle, WA', coord: [-122.3139, 47.6608] },
+  { id: 'north-cascades', query: 'North Cascades National Park', coord: DESTINATION },
+  { id: 'fremont-market', query: 'Fremont Sunday Market, Seattle', coord: [-122.3496, 47.6497] },
+  { id: 'alki-beach', query: 'Alki Beach Park, Seattle', coord: [-122.4106, 47.5812] },
+  { id: 'chihuly-garden', query: 'Chihuly Garden and Glass, Seattle', coord: [-122.3502, 47.6205] },
+  { id: 'gas-works-park', query: 'Gas Works Park, Seattle', coord: [-122.3343, 47.6456] },
 ]
 
 /** Every place that can open the detail sheet, keyed by id. */
