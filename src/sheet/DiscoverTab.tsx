@@ -41,7 +41,7 @@ function PlaceRow({ place }: { place: SavedPlace }) {
             disabled={inItinerary}
           >
             <Icon name={inItinerary ? 'check' : 'add'} size={18} />
-            Itinerary
+            Itineraries
           </button>
         </div>
       </div>
@@ -74,7 +74,7 @@ function TripRow({ item }: { item: ListItem }) {
           </button>
           <button className="pill pill-soft pill-sm">
             <Icon name="add" size={18} />
-            Itinerary
+            Itineraries
           </button>
         </div>
       </div>

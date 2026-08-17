@@ -29,7 +29,7 @@ export function TripMapScreen() {
                 className={tab === 'itinerary' ? 'is-active' : ''}
                 onClick={() => setTab('itinerary')}
               >
-                Itinerary
+                Itineraries
               </button>
               <button
                 role="tab"
