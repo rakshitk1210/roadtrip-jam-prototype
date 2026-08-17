@@ -43,7 +43,7 @@
   border-radius: 999px;
   font-size: 16px;
   font-weight: 500;
-  letter-spacing: -0.48px;
+  letter-spacing: 0;
   white-space: nowrap;
   transition: transform 120ms ease, opacity 160ms ease;
 }
@@ -74,7 +74,7 @@
   padding: 8px 14px 8px 12px;
   font-size: 14px;
   font-weight: 400;
-  letter-spacing: -0.42px;
+  letter-spacing: 0;
 }
 
 .pill-icon {
@@ -95,7 +95,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.42px;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--ink-muted);
 }
@@ -103,7 +103,7 @@
 .section-note {
   margin: -6px 0 0;
   font-size: 12px;
-  letter-spacing: -0.2px;
+  letter-spacing: 0;
   color: var(--ink-secondary);
 }
 
@@ -163,7 +163,7 @@
   background: rgba(32, 33, 36, 0.92);
   color: #fff;
   font-size: 14px;
-  letter-spacing: -0.2px;
+  letter-spacing: 0;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
   animation: toast-in 220ms cubic-bezier(0.2, 1.2, 0.4, 1);
   pointer-events: none;
@@ -251,7 +251,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 500;
-  letter-spacing: -0.6px;
+  letter-spacing: 0;
 }
 
 .jam-sub {
@@ -366,7 +366,7 @@
 
 .title-row .title {
   font-size: 20.4px;
-  letter-spacing: -0.61px;
+  letter-spacing: 0;
 }
 
 .avatar-cluster {
@@ -417,7 +417,7 @@
   align-items: center;
   gap: 4px;
   font-size: 16px;
-  letter-spacing: -0.48px;
+  letter-spacing: 0;
   color: var(--ink-muted);
 }
 
@@ -442,7 +442,7 @@
   border-radius: 999px;
   background: #fff;
   font-size: 14px;
-  letter-spacing: -0.42px;
+  letter-spacing: 0;
   backdrop-filter: blur(2.5px);
 }
 
@@ -457,7 +457,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 28px 28px 0 0;
-  background: rgba(248, 250, 244, 0.94);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   box-shadow: var(--shadow-sheet);
   will-change: transform;
@@ -493,11 +493,11 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 0 16px 28px;
+  padding: 0 16px calc(28px + var(--sheet-hidden, 0px));
 }
 
 .sheet-detail .sheet-body {
-  padding: 0;
+  padding: 0 0 var(--sheet-hidden, 0px);
 }
 
 .segmented {
@@ -513,7 +513,7 @@
   padding: 8px;
   border-radius: 999px;
   font-size: 18px;
-  letter-spacing: -0.54px;
+  letter-spacing: 0;
   color: var(--ink-secondary);
   transition: background 180ms ease, color 180ms ease;
 }
@@ -535,8 +535,7 @@
 
 /* ---------- Itinerary rows ---------- */
 
-.itin-section,
-.list-section {
+.itin-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -560,8 +559,7 @@
   opacity: 0.5;
 }
 
-.itin-thumb,
-.list-thumb {
+.itin-thumb {
   position: relative;
   flex: none;
   width: 93px;
@@ -570,15 +568,13 @@
   overflow: hidden;
 }
 
-.itin-photo,
-.list-photo {
+.itin-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.itin-avatar,
-.list-avatar {
+.itin-avatar {
   position: absolute;
   right: 4px;
   bottom: 4px;
@@ -589,8 +585,7 @@
   object-fit: cover;
 }
 
-.itin-meta,
-.list-meta {
+.itin-meta {
   display: flex;
   flex: 1;
   min-width: 0;
@@ -599,35 +594,24 @@
   height: 93px;
 }
 
-.itin-text,
-.list-text {
+.itin-text {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
-.itin-name,
-.list-name {
+.itin-name {
   margin: 0;
   font-size: 18px;
-  letter-spacing: -0.54px;
+  letter-spacing: 0;
   color: var(--ink-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.itin-meta .pill,
-.list-meta .pill {
+.itin-meta .pill {
   align-self: flex-start;
-}
-
-/* ---------- Discover rows ---------- */
-
-.list-row {
-  display: flex;
-  align-items: center;
-  gap: 13px;
 }
 
 /* Rows backed by a real place open the detail sheet. */
@@ -653,19 +637,390 @@
   outline-offset: 2px;
 }
 
-.list-byline {
+/* ============================== Discover ============================== */
+
+.discover {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.discover-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.discover-heading {
   margin: 0;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-primary);
+}
+
+/* ---------- Category filter ---------- */
+
+/* Bleeds past the sheet's 16px gutter so the row scrolls edge to edge. */
+.cat-row {
+  display: flex;
+  gap: 0;
+  margin: 0 -16px;
+  padding: 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cat-row::-webkit-scrollbar {
+  display: none;
+}
+
+.cat {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 16px;
+  border-radius: 14px;
+  transition: background 140ms ease;
+}
+
+.cat:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.cat-emoji {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+.cat-label {
   font-size: 12px;
+  letter-spacing: 0;
+  color: var(--ink-primary);
+  white-space: nowrap;
+}
+
+/* ---------- Saved list ---------- */
+
+.saved-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.saved-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* Overrides the shared tappable inset, which assumes a gutterless row. */
+.saved-row.is-tappable {
+  margin: 0;
+  border-radius: 0;
+}
+
+.saved-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.saved-thumb {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.saved-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.saved-avatar {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.2px solid #fff;
+  object-fit: cover;
+}
+
+.saved-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.saved-name {
+  margin: 0;
+  font-size: 18px;
+  line-height: 26px;
+  letter-spacing: 0;
+  color: var(--ink-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
   color: var(--ink-secondary);
 }
 
-.list-handle {
-  color: var(--ink-muted);
+.meta-dot {
+  color: inherit;
 }
 
-.list-actions {
+.meta-category {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta-line .rating-compact {
+  gap: 2px;
+  color: inherit;
+}
+
+.meta-line .rating-compact .rating-value,
+.meta-line .rating-compact .rating-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: inherit;
+}
+
+/* On a photo the whole line lifts to the light grey the design uses. */
+.meta-line.is-on-dark {
+  color: var(--drag-handle);
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--surface-dim);
+  color: var(--ink-primary);
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.add-btn:active {
+  transform: scale(0.94);
+}
+
+.add-btn.is-done {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* On a photo the button inverts, and the design draws it a touch smaller. */
+.add-btn-light {
+  width: 38px;
+  height: 38px;
+  background: #fff;
+}
+
+.saved-quote {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-dim);
+}
+
+.quote-avatar {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.quote-text {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-style: italic;
+  color: var(--ink-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-quote .meta-dot {
+  color: var(--drag-handle);
+}
+
+.view-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px;
+  font-size: 14px;
+  letter-spacing: 0;
+  color: var(--ink-primary);
+}
+
+/* ---------- Curated for your group ---------- */
+
+.curated-card {
+  position: relative;
+  height: 232px;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.curated-card.is-hero {
+  height: 300px;
+  border-radius: 24px;
+}
+
+.curated-card:active {
+  transform: scale(0.99);
+}
+
+.curated-card:focus-visible {
+  outline: 2px solid var(--cyan-pin);
+  outline-offset: 2px;
+}
+
+.curated-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The art is square and the cards are landscape, so bias the crop upward:
+     the subject sits above centre, and the lower third is under the scrim. */
+  object-position: 50% 15%;
+}
+
+.curated-badges {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.curated-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.curated-badge-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #fff;
+  object-fit: cover;
+}
+
+.curated-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
+  background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+}
+
+.curated-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.curated-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.curated-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.is-hero .curated-name {
+  font-size: 20px;
+}
+
+.is-hero .curated-overlay {
+  padding: 16px 16px 26px;
+}
+
+/* The hero doubles as the rail's position indicator. */
+.curated-progress {
+  height: 4px;
+  margin-bottom: 46px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.curated-progress-fill {
+  display: block;
+  width: 53px;
+  height: 100%;
+  margin-left: 80px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+/* Bleeds right so the third card is visibly cut off, as in the design. */
+.curated-rail {
+  display: flex;
+  gap: 12px;
+  margin-right: -16px;
+  padding-right: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.curated-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.curated-rail .curated-card {
+  flex: none;
+  width: 280px;
 }
 
 /* ============================ Place detail ============================ */
@@ -696,7 +1051,7 @@
   font-size: 24px;
   font-weight: 500;
   line-height: 1.2;
-  letter-spacing: -0.2px;
+  letter-spacing: 0;
 }
 
 .detail-hours {
@@ -766,7 +1121,7 @@
   gap: 6px;
   font-size: 16px;
   font-weight: 500;
-  letter-spacing: -0.2px;
+  letter-spacing: 0;
 }
 
 .kbyg ul {
@@ -782,7 +1137,7 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  letter-spacing: -0.2px;
+  letter-spacing: 0;
 }
 
 .kbyg-chevron {

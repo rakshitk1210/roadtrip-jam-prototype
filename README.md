@@ -77,7 +77,8 @@ public/assets/          PNG/JPG/SVG exported from the Figma file
   Figma components carry Material's own keyword lists (`chevron_right`,
   `local_cafe`, `drag_indicator`), so the font is the same artwork at the right
   optical size and inherits `currentColor`.
-- **Type** is Roboto. Google Sans Flex, which the file uses, is not public.
+- **Type** is Google Sans Flex, the same face the Figma file uses, served from
+  Google Fonts as a variable font so one 50 KB file covers every weight.
 - **Coordinates are real** — Outback Kangaroo Farm sits at its actual Arlington,
   WA location, which is why the route runs I-5 north before turning east on
   SR-20. The Figma composition places the sticker a little further north.

@@ -116,20 +116,15 @@ export const EMOJI_POIS: { id: string; emoji: string; coord: LngLat }[] = [
 /** Zoom at which the emoji POIs fade in. */
 export const POI_ZOOM = 11.5
 
-export interface ListItem {
-  id: string
-  name: string
-  rating: number
-  reviews: number
-  photo: string
-  avatar: string
-  byline?: string
-  handle?: string
-}
-
 /** A saved place is a full Place plus the friend who saved it. */
 export interface SavedPlace extends Place {
   avatar: string
+  /** Shortest detour off the route, in miles — the `1.5 mi` in a Discover row. */
+  distanceMi?: number
+  /** Google's own label for the place: `Lake`, `State Park`, `Hiking Area`. */
+  category?: string
+  /** A friend's one-line note, shown under the row it belongs to. */
+  quote?: { text: string; avatar: string }
 }
 
 /**
@@ -256,6 +251,42 @@ export const SEEDED_STOPS: Place[] = [
 ]
 
 /**
+ * The two eateries the curated rail recommends. Kona Kitchen is a real Hawaiian
+ * diner in Maple Leaf; Kone Bar and Grill is invented, so it keeps its authored
+ * rating and artwork rather than being looked up.
+ */
+export const CURATED_PLACES: Place[] = [
+  {
+    id: 'kona-kitchen',
+    name: 'Kona Kitchen',
+    hours: 'Opens 11:00am Thu',
+    rating: 4.6,
+    reviews: 1288,
+    coord: [-122.3233564, 47.6906269], // 8501 5th Ave NE, Seattle
+    thumb: PADDLER,
+    photos: [PADDLER, LAKE, KAYAK],
+    knowBeforeYouGo: [
+      'The loco moco is the order — it sells out on weekend mornings',
+      'Street parking on 5th is tight, but the lot behind the building is free',
+    ],
+  },
+  {
+    id: 'kone-bar-grill',
+    name: 'Kone Bar and Grill',
+    hours: 'Opens 12:00pm Thu',
+    rating: 4.5,
+    reviews: 478,
+    coord: [-122.2015, 47.9781], // Everett, first stop out of the city
+    thumb: KAYAK,
+    photos: [KAYAK, PADDLER, LAKE],
+    knowBeforeYouGo: [
+      'Half the menu is vegetarian, and the kitchen will veganise most of the rest',
+      'The patio is heated, so it stays usable well past sunset',
+    ],
+  },
+]
+
+/**
  * Designed places that exist for real, with the search text that finds them.
  * Their photographs get replaced by Google's; the sticker art, hand-written
  * tips and the names on the map all stay as designed.
@@ -266,24 +297,66 @@ export const SEEDED_STOPS: Place[] = [
 export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] = [
   { id: KANGAROO.id, query: 'Outback Kangaroo Farm, Arlington, WA', coord: KANGAROO.coord },
   { id: 'diablo-lake-hike', query: 'Diablo Lake Trail, North Cascades', coord: [-121.13, 48.714] },
+  { id: 'kona-kitchen', query: 'Kona Kitchen - Seattle', coord: [-122.3233564, 47.6906269] },
 ]
 
 /** Every place that can open the detail sheet, keyed by id. */
 export const PLACES: Record<string, Place> = Object.fromEntries(
-  [KANGAROO, ...SAVED, ...SEEDED_STOPS].map((p) => [p.id, p]),
+  [KANGAROO, ...SAVED, ...SEEDED_STOPS, ...CURATED_PLACES].map((p) => [p.id, p]),
 )
 
-/** People on this jam who have already driven some of it. */
-export const FROM_FRIENDS: ListItem[] = [
-  { id: 'friend-1', name: '2-day North Cascades trip', rating: 4.9, reviews: 41, photo: '/assets/itin-silver-stream.png', avatar: '/assets/you-avatar-1.jpg', byline: 'Jordan Blake' },
-  { id: 'friend-2', name: '1-day Cascades kayaking trip', rating: 4.7, reviews: 33, photo: '/assets/itin-kayak.png', avatar: '/assets/you-avatar-2.jpg', byline: 'Taylor Reed' },
-  { id: 'friend-3', name: 'Weekend Mount Rainier hike', rating: 4.8, reviews: 58, photo: '/assets/itin-silver-stream.png', avatar: '/assets/you-avatar-3.jpg', byline: 'Morgan Lee' },
-  { id: 'friend-4', name: 'Lake Washington paddle', rating: 4.6, reviews: 27, photo: '/assets/itin-kayak.png', avatar: '/assets/you-avatar-4.jpg', byline: 'Casey Quinn' },
+/**
+ * What the group is being pointed at. Each card names a place the detail sheet
+ * already knows, so tapping one opens the same sheet the Discover rows do; the
+ * badge is the card's own editorial line.
+ */
+export interface CuratedCard {
+  placeId: string
+  badge: string
+  distanceMi: number
+  /** Set where the badge is attributed to someone — the 28px face beside it. */
+  avatar?: string
+  /**
+   * Overrides the place's own photo. The card art is art-directed in Figma,
+   * whereas `thumb` is whatever Places hands back for the same listing.
+   */
+  image?: string
+}
+
+/** The full-width card at the top of the rail. */
+export const CURATED_HERO: CuratedCard = {
+  placeId: KANGAROO.id,
+  badge: '🔥 Group Match',
+  distanceMi: 1.5,
+  image: '/assets/kangaroo.png',
+}
+
+/** The cards that scroll horizontally beneath the hero. */
+export const CURATED_RAIL: CuratedCard[] = [
+  {
+    placeId: 'kona-kitchen',
+    badge: '💎 Discovered by 37 people',
+    distanceMi: 0.8,
+    avatar: '/assets/cindy.png',
+  },
+  { placeId: 'kone-bar-grill', badge: '🌱 Vegetarian-Friendly', distanceMi: 1.5 },
+  { placeId: 'diablo-lake-hike', badge: '✅ Must Do', distanceMi: 1.5 },
 ]
 
-/** Creators who have never been on this jam — public itineraries that overlap it. */
-export const FROM_CREATORS: ListItem[] = [
-  { id: 'creator-1', name: 'Cascade Loop in 48 hours', rating: 4.9, reviews: 1204, photo: '/assets/itin-silver-stream.png', avatar: '/assets/topbar-av-1.jpg', byline: 'Nina Okafor', handle: '@ninaroams' },
-  { id: 'creator-2', name: 'Roadside oddities of WA-20', rating: 4.7, reviews: 863, photo: '/assets/thumb-kangaroo.jpg', avatar: '/assets/topbar-av-3.jpg', byline: 'Sam Ferreira', handle: '@detourdiary' },
-  { id: 'creator-3', name: 'Every diner between Seattle & Baker', rating: 4.8, reviews: 2417, photo: '/assets/photo-kayak-lake.png', avatar: '/assets/topbar-av-4.jpg', byline: 'Priya Raman', handle: '@lastexitfood' },
+/** The filter row above the saved list. Cosmetic — nothing filters yet. */
+export const DISCOVER_CATEGORIES: { id: string; emoji: string; label: string }[] = [
+  { id: 'search', emoji: '🔎', label: 'Search' },
+  { id: 'restaurants', emoji: '🍔', label: 'Restaurants' },
+  { id: 'coffee', emoji: '☕️', label: 'Coffee' },
+  { id: 'shopping', emoji: '🛍️', label: 'Shopping' },
+  { id: 'nature', emoji: '🍀', label: 'Nature' },
 ]
+
+/**
+ * The design puts a friend's note under the first saved row. The live list is
+ * whatever Places returns, so the quote attaches by position rather than by id.
+ */
+export const SAVED_QUOTE = {
+  text: 'You can see beautiful stars here at night',
+  avatar: '/assets/you-avatar-1.jpg',
+}

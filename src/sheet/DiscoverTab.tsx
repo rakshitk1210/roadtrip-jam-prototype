@@ -1,16 +1,74 @@
+import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { Rating } from '../components/Rating'
-import { FROM_CREATORS, FROM_FRIENDS, type ListItem, type SavedPlace } from '../data/places'
+import {
+  CURATED_HERO,
+  CURATED_RAIL,
+  DISCOVER_CATEGORIES,
+  SAVED_QUOTE,
+  type CuratedCard,
+  type Place,
+  type SavedPlace,
+} from '../data/places'
 import { useTrip } from '../state/tripContext'
 
+/** Rows collapse to this many until "View More" is tapped. */
+const COLLAPSED_ROWS = 4
+
+/** Cosmetic for now — the design has no filtered state to switch to. */
+function CategoryChips() {
+  return (
+    <div className="cat-row">
+      {DISCOVER_CATEGORIES.map((c) => (
+        <button key={c.id} className="cat" type="button">
+          <span className="cat-emoji">{c.emoji}</span>
+          <span className="cat-label">{c.label}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/** The `4.8 ★ (198) · 1.5 mi · Lake` line under a place name. */
+function MetaLine({
+  place,
+  gem = false,
+  onDark = false,
+}: {
+  place: SavedPlace | Place
+  gem?: boolean
+  onDark?: boolean
+}) {
+  const distance = 'distanceMi' in place ? place.distanceMi : undefined
+  const category = 'category' in place ? place.category : undefined
+
+  return (
+    <div className={`meta-line${onDark ? ' is-on-dark' : ''}`}>
+      <Rating rating={place.rating} reviews={place.reviews} gem={gem} compact />
+      {distance !== undefined && (
+        <>
+          <span className="meta-dot">•</span>
+          <span>{distance} mi</span>
+        </>
+      )}
+      {category && (
+        <>
+          <span className="meta-dot">•</span>
+          <span className="meta-category">{category}</span>
+        </>
+      )}
+    </div>
+  )
+}
+
 /** A saved place: tapping the row opens its detail sheet. */
-function PlaceRow({ place }: { place: SavedPlace }) {
+function SavedRow({ place, quote }: { place: SavedPlace; quote?: typeof SAVED_QUOTE }) {
   const { openPlace, addToItinerary, morning, evening, hasGem } = useTrip()
   const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
 
   return (
     <div
-      className="list-row is-tappable"
+      className="saved-row is-tappable"
       role="button"
       tabIndex={0}
       onClick={() => openPlace(place.id)}
@@ -21,60 +79,89 @@ function PlaceRow({ place }: { place: SavedPlace }) {
         }
       }}
     >
-      <div className="list-thumb">
-        <img className="list-photo" src={place.thumb} alt="" />
-        <img className="list-avatar" src={place.avatar} alt="" />
-      </div>
-      <div className="list-meta">
-        <div className="list-text">
-          <p className="list-name">{place.name}</p>
-          <Rating rating={place.rating} reviews={place.reviews} gem={hasGem(place.id)} />
+      <div className="saved-main">
+        <div className="saved-thumb">
+          <img className="saved-photo" src={place.thumb} alt="" />
+          <img className="saved-avatar" src={place.avatar} alt="" />
         </div>
-        {/* The row-level buttons act on their own, so they swallow the row tap. */}
-        <div className="list-actions" onClick={(e) => e.stopPropagation()}>
-          <button className="pill pill-soft pill-icon" aria-label={`Saved: ${place.name}`}>
-            <Icon name="bookmark_added" size={18} fill />
-          </button>
-          <button
-            className={`pill pill-soft pill-sm${inItinerary ? ' is-done' : ''}`}
-            onClick={() => addToItinerary(place.id)}
-            disabled={inItinerary}
-          >
-            <Icon name={inItinerary ? 'check' : 'add'} size={18} />
-            Itineraries
-          </button>
+        <div className="saved-text">
+          <p className="saved-name">{place.name}</p>
+          <MetaLine place={place} gem={hasGem(place.id)} />
         </div>
+        {/* The add button acts on its own, so it swallows the row tap. */}
+        <button
+          className={`add-btn${inItinerary ? ' is-done' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation()
+            addToItinerary(place.id)
+          }}
+          disabled={inItinerary}
+          aria-label={inItinerary ? `${place.name} is in your itinerary` : `Add ${place.name} to your itinerary`}
+        >
+          <Icon name={inItinerary ? 'check' : 'add_location_alt'} size={22} />
+        </button>
       </div>
+
+      {quote && (
+        <div className="saved-quote">
+          <img className="quote-avatar" src={quote.avatar} alt="" />
+          <span className="meta-dot">•</span>
+          <p className="quote-text">“{quote.text}”</p>
+        </div>
+      )}
     </div>
   )
 }
 
-/** A trip recommendation — an itinerary someone else drove, not a place. */
-function TripRow({ item }: { item: ListItem }) {
+/** A photo card in the curated section — the hero is the same thing, wider. */
+function CuratedTile({ card, hero = false }: { card: CuratedCard; hero?: boolean }) {
+  const { findPlace, openPlace, addToItinerary, morning, evening } = useTrip()
+  const place = findPlace(card.placeId)
+  if (!place) return null
+
+  const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
+
   return (
-    <div className="list-row">
-      <div className="list-thumb">
-        <img className="list-photo" src={item.photo} alt="" />
-        <img className="list-avatar" src={item.avatar} alt="" />
+    <div
+      className={`curated-card${hero ? ' is-hero' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => openPlace(place.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          openPlace(place.id)
+        }
+      }}
+    >
+      <img className="curated-photo" src={card.image ?? place.thumb} alt="" />
+
+      <div className="curated-badges">
+        <span className="curated-badge">{card.badge}</span>
+        {card.avatar && <img className="curated-badge-avatar" src={card.avatar} alt="" />}
       </div>
-      <div className="list-meta">
-        <div className="list-text">
-          <p className="list-name">{item.name}</p>
-          {item.byline && (
-            <p className="list-byline">
-              {item.byline}
-              {item.handle && <span className="list-handle"> · {item.handle}</span>}
-            </p>
-          )}
-          <Rating rating={item.rating} reviews={item.reviews} />
-        </div>
-        <div className="list-actions">
-          <button className="pill pill-soft pill-icon" aria-label="Save">
-            <Icon name="bookmark_added" size={18} fill />
-          </button>
-          <button className="pill pill-soft pill-sm">
-            <Icon name="add" size={18} />
-            Itineraries
+
+      <div className="curated-overlay">
+        {hero && (
+          <div className="curated-progress">
+            <span className="curated-progress-fill" />
+          </div>
+        )}
+        <div className="curated-info">
+          <div className="curated-text">
+            <p className="curated-name">{place.name}</p>
+            <MetaLine place={{ ...place, distanceMi: card.distanceMi }} onDark />
+          </div>
+          <button
+            className={`add-btn add-btn-light${inItinerary ? ' is-done' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              addToItinerary(place.id)
+            }}
+            disabled={inItinerary}
+            aria-label={inItinerary ? `${place.name} is in your itinerary` : `Add ${place.name} to your itinerary`}
+          >
+            <Icon name={inItinerary ? 'check' : 'add_location_alt'} size={24} />
           </button>
         </div>
       </div>
@@ -84,30 +171,41 @@ function TripRow({ item }: { item: ListItem }) {
 
 export function DiscoverTab() {
   const { discover } = useTrip()
+  const [expanded, setExpanded] = useState(false)
+
+  const rows = expanded ? discover : discover.slice(0, COLLAPSED_ROWS)
 
   return (
-    <div className="sheet-card">
-      <section className="list-section">
-        <h2 className="section-label">Saved</h2>
-        {discover.map((place) => (
-          <PlaceRow key={place.id} place={place} />
-        ))}
+    <div className="discover">
+      <CategoryChips />
+
+      <section className="discover-section">
+        <h2 className="discover-heading">Saved list</h2>
+        <div className="saved-card">
+          {rows.map((place, i) => (
+            <SavedRow
+              key={place.id}
+              place={place}
+              quote={place.quote ?? (i === 0 ? SAVED_QUOTE : undefined)}
+            />
+          ))}
+          {discover.length > COLLAPSED_ROWS && (
+            <button className="view-more" onClick={() => setExpanded((v) => !v)}>
+              {expanded ? 'View Less' : 'View More'}
+              <Icon name={expanded ? 'expand_less' : 'expand_more'} size={20} />
+            </button>
+          )}
+        </div>
       </section>
 
-      <section className="list-section">
-        <h2 className="section-label">From your friends</h2>
-        <p className="section-note">People on this jam who have driven parts of it</p>
-        {FROM_FRIENDS.map((item) => (
-          <TripRow key={item.id} item={item} />
-        ))}
-      </section>
-
-      <section className="list-section">
-        <h2 className="section-label">From travel creators</h2>
-        <p className="section-note">Public itineraries that overlap your route — no one here has been on this jam</p>
-        {FROM_CREATORS.map((item) => (
-          <TripRow key={item.id} item={item} />
-        ))}
+      <section className="discover-section">
+        <h2 className="discover-heading">Curated for your group</h2>
+        <CuratedTile card={CURATED_HERO} hero />
+        <div className="curated-rail">
+          {CURATED_RAIL.map((card) => (
+            <CuratedTile key={card.placeId} card={card} />
+          ))}
+        </div>
       </section>
     </div>
   )

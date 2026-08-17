@@ -57,7 +57,8 @@ const MIN_RATING = 4.4
 const MIN_REVIEWS = 25
 const MAX_RESULTS = 12
 
-const CACHE_KEY = 'roadtrip-jam:discover:v1'
+// v2 adds `distanceMi` and `category`; a v1 entry would render rows without them.
+const CACHE_KEY = 'roadtrip-jam:discover:v2'
 
 /** The friend avatars the design attributes saves to, assigned round-robin. */
 const AVATARS = [
@@ -90,6 +91,39 @@ function anchors(count: number): LngLat[] {
   })
 }
 
+const EARTH_MI = 3958.8
+
+/**
+ * How far a place sits off the drive, in miles — the `1.5 mi` a Discover row
+ * shows. Both ends are projected flat before measuring: at this latitude and
+ * over this distance the error stays well under the 0.1 mi the row displays,
+ * and it keeps the point-to-segment maths to plain vectors.
+ */
+function milesFromRoute([lng, lat]: LngLat): number {
+  const line = routes.direct.coordinates as number[][]
+  const scale = Math.cos((lat * Math.PI) / 180)
+  const toXY = ([l, a]: number[]): [number, number] => [
+    ((l * Math.PI) / 180) * scale * EARTH_MI,
+    ((a * Math.PI) / 180) * EARTH_MI,
+  ]
+
+  const [px, py] = toXY([lng, lat])
+  let best = Infinity
+
+  for (let i = 0; i < line.length - 1; i++) {
+    const [ax, ay] = toXY(line[i])
+    const [bx, by] = toXY(line[i + 1])
+    const dx = bx - ax
+    const dy = by - ay
+    const lenSq = dx * dx + dy * dy
+    // A zero-length segment has no direction to project onto; use its start.
+    const t = lenSq === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / lenSq))
+    best = Math.min(best, Math.hypot(ax + t * dx - px, ay + t * dy - py))
+  }
+
+  return best
+}
+
 /**
  * Place Photos are served from Google at render time rather than downloaded.
  * Their terms allow storing place IDs indefinitely but not re-hosting photo
@@ -116,6 +150,7 @@ function toSavedPlace(p: ApiPlace, key: string, index: number): SavedPlace | nul
 
   const summary = p.editorialSummary?.text
   const kind = p.primaryTypeDisplayName?.text
+  const coord: LngLat = [loc.longitude, loc.latitude]
 
   return {
     id: p.id,
@@ -127,10 +162,12 @@ function toSavedPlace(p: ApiPlace, key: string, index: number): SavedPlace | nul
         : 'Closed right now',
     rating: p.rating ?? 0,
     reviews: p.userRatingCount ?? 0,
-    coord: [loc.longitude, loc.latitude],
+    coord,
     thumb: photos[0],
     photos,
     avatar: AVATARS[index % AVATARS.length],
+    distanceMi: Math.round(milesFromRoute(coord) * 10) / 10,
+    category: kind,
     knowBeforeYouGo: [
       summary ?? `A ${(kind ?? 'stop').toLowerCase()} a short detour off your route`,
       `Rated ${(p.rating ?? 0).toFixed(1)} by ${p.userRatingCount ?? 0} travellers on Google`,
@@ -217,7 +254,8 @@ export interface PlaceOverride {
   reviews: number
 }
 
-const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v1'
+// v2 re-resolves Kona Kitchen against its exact Seattle listing.
+const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v2'
 
 /**
  * Looks a designed place up by name and pulls its real photographs. The Kangaroo

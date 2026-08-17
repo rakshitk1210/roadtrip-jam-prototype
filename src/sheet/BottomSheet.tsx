@@ -89,7 +89,11 @@ export function BottomSheet({ snap, onSnapChange, header, children, className = 
         height: fullPx,
         transform: `translateY(${translate}px)`,
         transition: drag ? 'none' : 'transform 340ms cubic-bezier(0.2, 0, 0, 1)',
-      }}
+        // Below `full`, the sheet's own tail hangs off the bottom of the screen.
+        // The body pads by that much so its last rows can still scroll into view.
+        // Taken from the snap rather than the live drag, so it doesn't jitter.
+        '--sheet-hidden': `${translateFor(snap)}px`,
+      } as React.CSSProperties}
     >
       <div
         className="sheet-drag-zone"
