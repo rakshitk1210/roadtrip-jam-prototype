@@ -16,6 +16,13 @@
   --cyan-soft: #d3edf2;
   --cyan-ai: #e2fcff;
   --cyan-pin: #14b4c6;
+  --cyan-container-light: #eef4f5;
+  --surface-nav: #eef2f6;
+  /* Deeper than --cyan-on, and only for a screen's one committing button. */
+  --teal-primary: #0d5c63;
+
+  /* Material's light primary-container, behind a friend's note on the photos. */
+  --blue-container: #d3e3fd;
 
   --red-destructive: #b3261e;
   /* Feedback: the dot that says the trip changed, and the wash on what changed. */

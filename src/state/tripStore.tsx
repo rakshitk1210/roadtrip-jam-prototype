@@ -29,8 +29,14 @@ type Action =
   | { type: 'setSnap'; snap: TripState['snap'] }
   | { type: 'openPlace'; id: string }
   | { type: 'closePlace' }
-  | { type: 'addToItinerary'; item: ItineraryItem }
+  | { type: 'addToItinerary'; item: ItineraryItem; at: 'next' | 'end' }
   | { type: 'toggleGem'; id: string }
+  | { type: 'togglePostTrip'; id: string }
+  | { type: 'closePostTrip' }
+  | { type: 'openGemDraft'; id: string }
+  | { type: 'closeGemDraft' }
+  | { type: 'openReview'; id: string }
+  | { type: 'closeReview' }
   | { type: 'clearToast' }
   | { type: 'clearAdded' }
   | { type: 'setDiscover'; result: DiscoverResult }
@@ -100,6 +106,9 @@ const initialState: TripState = {
   tab: 'itinerary',
   snap: 'half',
   activePlaceId: null,
+  postTripId: null,
+  gemDraftId: null,
+  reviewId: null,
   // The kangaroo zoo is deliberately absent — "Add to itinerary" is what puts
   // it here, which is the point of the flow.
   itinerary: SEEDED_STOPS.map(toItineraryItem),
@@ -108,7 +117,9 @@ const initialState: TripState = {
   selection: [],
   addedId: null,
   itineraryChanged: false,
-  gems: [],
+  // Kona Kitchen arrives already gemmed, which is what its curated card has
+  // been claiming all along — the map just never agreed with it.
+  gems: ['kona-kitchen'],
   toast: null,
   // The designed list renders immediately and stands in whenever Places is
   // unavailable, so Discover is never empty. There is no designed stand-in for
@@ -142,7 +153,11 @@ function reducer(state: TripState, action: Action): TripState {
       if (state.itinerary.some((i) => i.id === action.item.id)) return state
       return {
         ...state,
-        itinerary: [...state.itinerary, action.item],
+        // "Next" is the front of the list, since the list reads in drive order.
+        itinerary:
+          action.at === 'next'
+            ? [action.item, ...state.itinerary]
+            : [...state.itinerary, action.item],
         addedId: action.item.id,
         itineraryChanged: true,
       }
@@ -155,6 +170,20 @@ function reducer(state: TripState, action: Action): TripState {
         toast: on ? 'Removed from your gems' : 'Marked as a gem 💎',
       }
     }
+    case 'togglePostTrip':
+      return { ...state, postTripId: state.postTripId === action.id ? null : action.id }
+    case 'closePostTrip':
+      return { ...state, postTripId: null }
+    // Both overlays cover the sheet, so the panel folds away behind them rather
+    // than being waiting underneath on the way back.
+    case 'openGemDraft':
+      return { ...state, gemDraftId: action.id, postTripId: null }
+    case 'closeGemDraft':
+      return { ...state, gemDraftId: null }
+    case 'openReview':
+      return { ...state, reviewId: action.id, postTripId: null }
+    case 'closeReview':
+      return { ...state, reviewId: null }
     case 'clearToast':
       return { ...state, toast: null }
     case 'clearAdded':
@@ -324,11 +353,17 @@ export function TripProvider({ children }: { children: ReactNode }) {
       setSnap: (snap) => dispatch({ type: 'setSnap', snap }),
       openPlace: (id) => dispatch({ type: 'openPlace', id }),
       closePlace: () => dispatch({ type: 'closePlace' }),
-      addToItinerary: (id) => {
+      addToItinerary: (id, at = 'end') => {
         const place = findPlace(id)
-        if (place) dispatch({ type: 'addToItinerary', item: toItineraryItem(place) })
+        if (place) dispatch({ type: 'addToItinerary', item: toItineraryItem(place), at })
       },
       toggleGem: (id) => withToast({ type: 'toggleGem', id }),
+      togglePostTrip: (id) => dispatch({ type: 'togglePostTrip', id }),
+      closePostTrip: () => dispatch({ type: 'closePostTrip' }),
+      openGemDraft: (id) => dispatch({ type: 'openGemDraft', id }),
+      closeGemDraft: () => dispatch({ type: 'closeGemDraft' }),
+      openReview: (id) => dispatch({ type: 'openReview', id }),
+      closeReview: () => dispatch({ type: 'closeReview' }),
       clearToast: () => dispatch({ type: 'clearToast' }),
       clearAdded: () => dispatch({ type: 'clearAdded' }),
       hasGem: (id) => state.gems.includes(id),

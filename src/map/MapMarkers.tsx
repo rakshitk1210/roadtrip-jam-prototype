@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
-import type { LngLat, Sticker } from '../data/places'
+import {
+  STICKER_DETAIL_ZOOM,
+  stickerScaleFor,
+  type LngLat,
+  type Sticker,
+} from '../data/places'
 import { useTrip } from '../state/tripContext'
 import { createHtmlMarker, type Anchor } from './HtmlMarker'
 
@@ -67,16 +72,19 @@ function StickerMarker({
   sticker,
   zoom,
   sizeScale,
+  hasStop,
   onClick,
 }: {
   sticker: Sticker
   zoom: number
   sizeScale: number
+  /** Whether a stop dot is drawn on this coordinate, which the layout clears. */
+  hasStop: boolean
   onClick?: () => void
 }) {
   const { hasGem } = useTrip()
   // Stickers grow with zoom so they read like map furniture, not fixed chrome.
-  const scale = Math.min(1.2, Math.max(0.72, 0.72 + (zoom - 8) * 0.12)) * sizeScale
+  const scale = stickerScaleFor(zoom, sizeScale)
   const width = sticker.width * scale
   // The library SVGs export with `preserveAspectRatio="none"`, so they stretch
   // unless both dimensions are given.
@@ -84,20 +92,37 @@ function StickerMarker({
   const gem = hasGem(sticker.id)
   const left = sticker.labelSide === 'left'
 
+  // Each line waits for the map to be detailed enough to be worth reading:
+  // further out they are so many words over the landscape. A gem outranks
+  // whatever the place was authored to say, being the newest thing known
+  // about it, and there is only room for the one line.
+  const detail = gem ? '💎 Discovered by 37 people' : sticker.detail
+  const showName = zoom >= STICKER_DETAIL_ZOOM.name
+  const showDetail = detail && zoom >= STICKER_DETAIL_ZOOM.detail
+  const showHours = sticker.hours && zoom >= STICKER_DETAIL_ZOOM.hours
+
   return (
     <div
-      className={`sticker${sticker.interactive ? ' is-interactive' : ''}${left ? ' label-left' : ''}`}
+      className={`sticker${sticker.interactive ? ' is-interactive' : ''}${left ? ' label-left' : ''}${hasStop ? ' has-stop' : ''}`}
       style={{ ['--sticker-scale' as string]: scale }}
       {...pressProps(sticker.label, sticker.interactive ? onClick : undefined)}
     >
       <div className="sticker-art" style={{ width, height }}>
-        {gem && <img className="sticker-gem" src="/assets/gem-diamond.png" alt="" />}
         <img className="sticker-img" src={sticker.image} alt="" style={{ width, height }} />
       </div>
-      <div className="sticker-text">
-        <span className="sticker-label">{sticker.label}</span>
-        {sticker.sublabel && <span className="sticker-sublabel">{sticker.sublabel}</span>}
-      </div>
+      {/* Dropped entirely rather than left empty, so the artwork doesn't carry
+          a blank box and its gap around at the zooms that show no text. */}
+      {showName && (
+        <div className="sticker-text">
+          <span className="sticker-label">{sticker.label}</span>
+          {showDetail && (
+            <span className={`sticker-sublabel sticker-detail${gem ? ' sticker-gem' : ''}`}>
+              {detail}
+            </span>
+          )}
+          {showHours && <span className="sticker-sublabel">{sticker.hours}</span>}
+        </div>
+      )}
     </div>
   )
 }
@@ -123,8 +148,9 @@ function EmojiChip({
       className={`emoji-chip${onClick ? ' is-interactive' : ''}`}
       {...pressProps(name, onClick)}
     >
-      {hasGem(id) && <img className="chip-gem" src="/assets/gem-diamond.png" alt="" />}
-      <span className="chip-glyph">{emoji}</span>
+      {/* A gem outranks whatever the place happens to be — the chip is small
+          enough that showing both would read as neither. */}
+      <span className="chip-glyph">{hasGem(id) ? '💎' : emoji}</span>
     </div>
   )
 }
@@ -171,15 +197,19 @@ function StopDot({ colour }: { colour: string }) {
 function LabeledStop({
   colour,
   label,
+  scale,
   onClick,
 }: {
   colour: string
   label: string
+  /** The sticker ramp, so a stop reads the same size in either tab. */
+  scale: number
   onClick?: () => void
 }) {
   return (
     <div
       className={`stop-labelled${onClick ? ' is-interactive' : ''}`}
+      style={{ ['--sticker-scale' as string]: scale }}
       {...pressProps(label, onClick)}
     >
       <StopDot colour={colour} />
@@ -231,6 +261,10 @@ export function MapMarkers({
   useEffect(() => setMounted(true), [])
   if (!mounted) return null
 
+  // Discover names its stops in plain text where Itinerary has a sticker do it.
+  // Reading the same ramp keeps a stop the same size across the switch.
+  const labelScale = stickerScaleFor(zoom, stickerScale)
+
   return (
     <>
       {showOrigin && (
@@ -258,6 +292,7 @@ export function MapMarkers({
             <LabeledStop
               colour={stop.colour}
               label={stop.label}
+              scale={labelScale}
               onClick={() => onOpenPlace(stop.id)}
             />
           </Marker>
@@ -293,6 +328,7 @@ export function MapMarkers({
               sticker={sticker}
               zoom={zoom}
               sizeScale={stickerScale}
+              hasStop={stops.some((stop) => stop.id === sticker.id)}
               onClick={() => onOpenPlace(sticker.id)}
             />
           </Marker>

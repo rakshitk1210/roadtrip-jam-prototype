@@ -87,18 +87,6 @@
   letter-spacing: -0.36px;
 }
 
-/* Gemming a saved place from the list shows up on its chip. */
-.chip-gem {
-  position: absolute;
-  top: -13px;
-  left: 50%;
-  width: 16px;
-  height: auto;
-  transform: translateX(-50%);
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
-  animation: gem-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1);
-}
-
 /* ---------- Ambient POIs ---------- */
 
 /* Far out these are pinpricks: something is there, but not what. */
@@ -159,6 +147,19 @@
   align-items: flex-end;
 }
 
+/* A stop already draws a 13px dot on the coordinate, so the artwork and its
+   label sit beside it as one piece rather than straddling it. The dot reaches
+   6.5px from the coordinate, and 5.5px of clearance puts the group at 12px. */
+.sticker.has-stop {
+  transform: translateX(12px);
+}
+
+/* Mirrored: anchored by its right edge, and row-reverse already puts the
+   artwork on the inside, so the group still reads outward from the dot. */
+.sticker.label-left.has-stop {
+  transform: translateX(-12px);
+}
+
 .sticker.is-interactive {
   pointer-events: auto;
   cursor: pointer;
@@ -179,26 +180,10 @@
   transition: transform 140ms ease;
 }
 
-.sticker-gem {
-  position: absolute;
-  top: -34%;
-  left: 50%;
-  width: calc(20px * var(--sticker-scale, 1));
-  height: auto;
-  transform: translateX(-50%);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  animation: gem-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1);
-  z-index: 1;
-}
-
-@keyframes gem-pop {
-  0% { transform: translateX(-50%) scale(0) translateY(6px); }
-  100% { transform: translateX(-50%) scale(1) translateY(0); }
-}
-
 .sticker-text {
   display: flex;
   flex-direction: column;
+  gap: calc(3px * var(--sticker-scale, 1));
   max-width: 116px;
   line-height: 1.15;
   /* The avocado style has no label layers, so marker text carries its own halo. */
@@ -216,6 +201,25 @@
 .sticker-sublabel {
   font-size: calc(9px * var(--sticker-scale, 1) + 1px);
   color: var(--ink-secondary);
+  /* Both the detail line and the hours are meant to read as a single line. */
+  white-space: nowrap;
+}
+
+/* Every detail line fades in rather than appearing the instant its zoom
+   threshold is crossed, so it reads as the map answering the zoom. */
+.sticker-detail {
+  animation: detail-in 260ms ease;
+}
+
+/* A gem is the map's own word about the place, so it takes the darker ink the
+   name has rather than the grey an ordinary note gets. */
+.sticker-gem {
+  color: var(--ink-primary);
+}
+
+@keyframes detail-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Google injects its own error panel here; the notice below replaces it. */
@@ -282,11 +286,13 @@
   transform: scale(0.88);
 }
 
+/* Sized off the sticker's own ramp rather than a flat 10px, so a stop doesn't
+   shrink the moment you switch out of Itinerary. */
 .stop-label {
-  max-width: 88px;
-  font-size: 10px;
+  max-width: 116px;
+  font-size: calc(11px * var(--sticker-scale, 1) + 2px);
   font-weight: 500;
-  line-height: 12px;
+  line-height: 1.15;
   color: var(--ink-primary);
   /* Same halo the stickers use — the basemap has no label plates to sit on. */
   text-shadow:

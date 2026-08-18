@@ -21,7 +21,6 @@ export function Rating({ rating, reviews, size = 'sm', gem = false, suffix, star
 
   return (
     <div className={`rating rating-${size}`}>
-      {gem && <img className="rating-gem" src="/assets/gem-diamond.png" alt="Marked as a gem" />}
       <span className="rating-value">{rating}</span>
       <span className="stars">
         {stars.map((on, i) => (
@@ -30,6 +29,11 @@ export function Rating({ rating, reviews, size = 'sm', gem = false, suffix, star
       </span>
       <span className="rating-count">({reviews})</span>
       {suffix && <span className="rating-suffix">· {suffix}</span>}
+      {gem && (
+        <span className="rating-gem" role="img" aria-label="Marked as a gem">
+          · 💎
+        </span>
+      )}
     </div>
   )
 }

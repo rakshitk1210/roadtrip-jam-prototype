@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Icon } from '../components/Icon'
 import { Rating } from '../components/Rating'
 import { detourFromRoute, formatMiles } from '../data/directions'
 import { useTrip, type Day, type ItineraryItem } from '../state/tripContext'
+import { PostTripPanel } from './PostTripPanel'
 import { useReorder } from './useReorder'
 
 function Row({
@@ -115,6 +116,7 @@ export function ItineraryTab() {
   const {
     itinerary,
     days,
+    postTripId,
     selectMode,
     selection,
     enterSelect,
@@ -202,14 +204,16 @@ export function ItineraryTab() {
                 handleProps={selectMode ? undefined : dayDrag.handleProps(dayIndex)}
               />
               {items.map((item, i) => (
-                <Row
-                  key={item.id}
-                  item={item}
-                  handleProps={rowDrag.handleProps(firstRow + i)}
-                  offset={rowDrag.offsetFor(firstRow + i)}
-                  lifted={rowDrag.liftedIndex === firstRow + i}
-                  added={item.id === addedId}
-                />
+                <Fragment key={item.id}>
+                  <Row
+                    item={item}
+                    handleProps={rowDrag.handleProps(firstRow + i)}
+                    offset={rowDrag.offsetFor(firstRow + i)}
+                    lifted={rowDrag.liftedIndex === firstRow + i}
+                    added={item.id === addedId}
+                  />
+                  {item.id === postTripId && <PostTripPanel id={item.id} name={item.name} />}
+                </Fragment>
               ))}
             </section>
           )
@@ -217,14 +221,16 @@ export function ItineraryTab() {
 
         <section className="itin-section">
           {ungrouped.map((item, i) => (
-            <Row
-              key={item.id}
-              item={item}
-              handleProps={rowDrag.handleProps(rowCount + i)}
-              offset={rowDrag.offsetFor(rowCount + i)}
-              lifted={rowDrag.liftedIndex === rowCount + i}
-              added={item.id === addedId}
-            />
+            <Fragment key={item.id}>
+              <Row
+                item={item}
+                handleProps={rowDrag.handleProps(rowCount + i)}
+                offset={rowDrag.offsetFor(rowCount + i)}
+                lifted={rowDrag.liftedIndex === rowCount + i}
+                added={item.id === addedId}
+              />
+              {item.id === postTripId && <PostTripPanel id={item.id} name={item.name} />}
+            </Fragment>
           ))}
         </section>
       </div>

@@ -1,16 +1,58 @@
+import { useEffect } from 'react'
 import { Icon } from '../components/Icon'
 import { TopChrome } from '../components/TopChrome'
+import { KANGAROO } from '../data/places'
 import { MapCanvas } from '../map/MapCanvas'
 import { BottomSheet } from '../sheet/BottomSheet'
 import { ItineraryTab } from '../sheet/ItineraryTab'
 import { DiscoverTab } from '../sheet/DiscoverTab'
 import { PlaceDetailSheet } from '../sheet/PlaceDetailSheet'
+import { HiddenGemScreen } from '../sheet/HiddenGemScreen'
+import { ReviewScreen } from '../sheet/ReviewScreen'
 import { useTrip } from '../state/tripContext'
 
 export function TripMapScreen() {
-  const { tab, setTab, snap, setSnap, activePlaceId, toast, selectMode, itineraryChanged } =
-    useTrip()
+  const {
+    tab,
+    setTab,
+    snap,
+    setSnap,
+    activePlaceId,
+    toast,
+    selectMode,
+    itineraryChanged,
+    itinerary,
+    togglePostTrip,
+    gemDraftId,
+    reviewId,
+  } = useTrip()
   const detailOpen = activePlaceId !== null
+
+  // The post-trip actions are reached by shortcut rather than by a control on
+  // the row, so they stay out of the way until asked for. Nothing happens until
+  // the farm is actually on the trip — adding it is what earns the prompt.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      // `code` names the physical key whatever the layout says it types.
+      if (e.code !== 'Space' || !e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return
+      // Space autorepeats when held, which would flicker the panel.
+      if (e.repeat) return
+      // In a field this is a space before it is a shortcut, and the check has
+      // to beat preventDefault or the field never gets it.
+      const el = e.target as HTMLElement | null
+      if (el?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '')) return
+      // Otherwise the sheet scrolls up and whatever button has focus fires too.
+      e.preventDefault()
+      // Both overlays cover the sheet, so a panel toggled under one would only
+      // be found on the way back out.
+      if (gemDraftId || reviewId) return
+      if (!itinerary.some((i) => i.id === KANGAROO.id)) return
+      setTab('itinerary')
+      togglePostTrip(KANGAROO.id)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [itinerary, setTab, togglePostTrip, gemDraftId, reviewId])
 
   return (
     <div className="trip-screen">
@@ -63,6 +105,9 @@ export function TripMapScreen() {
           </button>
         </div>
       )}
+
+      {gemDraftId && <HiddenGemScreen placeId={gemDraftId} />}
+      {reviewId && <ReviewScreen placeId={reviewId} />}
 
       {toast && <div className="toast">{toast}</div>}
     </div>

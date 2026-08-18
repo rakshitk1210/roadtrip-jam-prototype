@@ -29,6 +29,12 @@ export interface TripState {
   snap: Snap
   /** Non-null while the place detail sheet is up. */
   activePlaceId: string | null
+  /** The itinerary row whose post-trip actions are expanded beneath it. */
+  postTripId: string | null
+  /** Non-null while the gem-capture screen is up, naming the place it captures. */
+  gemDraftId: string | null
+  /** Non-null while the review form is up. */
+  reviewId: string | null
   gems: string[]
   toast: string | null
   /**
@@ -66,9 +72,19 @@ export interface TripValue extends TripState {
   setSnap: (snap: Snap) => void
   openPlace: (id: string) => void
   closePlace: () => void
-  /** Adding a place to the itinerary is what puts it on the route. */
-  addToItinerary: (id: string) => void
+  /**
+   * Adding a place to the itinerary is what puts it on the route. `next` makes
+   * it the first stop of the drive; everything else lands at the end.
+   */
+  addToItinerary: (id: string, at?: 'next' | 'end') => void
   toggleGem: (id: string) => void
+  /** Expands the post-trip actions under a row, or folds them away again. */
+  togglePostTrip: (id: string) => void
+  closePostTrip: () => void
+  openGemDraft: (id: string) => void
+  closeGemDraft: () => void
+  openReview: (id: string) => void
+  closeReview: () => void
   clearToast: () => void
   /** Drops the highlight from the newly added stop. */
   clearAdded: () => void

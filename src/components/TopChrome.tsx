@@ -1,4 +1,5 @@
 import { Icon } from './Icon'
+import { StatusBar } from './StatusBar'
 import { useTrip } from '../state/tripContext'
 
 /** Four overlapping faces, positioned exactly as in the Figma avatar cluster. */
@@ -18,14 +19,7 @@ export function TopChrome() {
 
   return (
     <div className="top-chrome">
-      <div className="status-bar">
-        <span className="status-time">9:41</span>
-        <span className="status-levels">
-          <img src="/assets/ic-cellular.svg" alt="" width={19.2} height={12.2} />
-          <img src="/assets/ic-wifi.svg" alt="" width={17.1} height={12.3} />
-          <img src="/assets/ic-battery.svg" alt="" width={27.3} height={13} />
-        </span>
-      </div>
+      <StatusBar />
 
       <div className="title-row">
         <button className="round-btn" onClick={backToYou} aria-label="Back">

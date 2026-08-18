@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import routes from '../data/routes.json'
 import {
+  CURATED_PLACES,
   DESTINATION,
   EMOJI_POIS,
   ORIGIN,
@@ -8,9 +9,9 @@ import {
   emojiFor,
   stickerForPlace,
   type LngLat,
-  type SavedPlace,
+  type Place,
 } from '../data/places'
-import { fetchRoute, haversineMiles, orderAlongRoute } from '../data/directions'
+import { fetchRoute, haversineMiles, labelSideFor, orderAlongRoute } from '../data/directions'
 import { useTrip } from '../state/tripContext'
 import { SNAP_FRACTION } from '../sheet/snaps'
 import { loadMaps, offsetCenter, toLatLng, widthForZoom } from './googleMaps'
@@ -123,8 +124,18 @@ export function MapCanvas() {
   const [zoom, setZoom] = useState(8)
   /** Whatever the route currently traces. The day segments slice this. */
   const [path, setPath] = useState<number[][]>(routes.direct.coordinates)
-  const { activePlaceId, openPlace, snap, discover, ambient, findPlace, tab, days, itinerary } =
-    useTrip()
+  const {
+    activePlaceId,
+    openPlace,
+    snap,
+    discover,
+    ambient,
+    findPlace,
+    tab,
+    days,
+    itinerary,
+    hasGem,
+  } = useTrip()
   const { settings, reportTilt } = useMapSettings()
   // The init effect runs once but needs the current settings; a ref keeps it
   // out of the dependency list.
@@ -375,20 +386,22 @@ export function MapCanvas() {
   // both, since nothing else worth showing sits this close.
   const onRoute = new Set(itinerary.map((item) => item.id))
   const routeCoords = itineraryStops.map((stop) => stop.coord)
-  const alreadyOnRoute = (place: SavedPlace) =>
+  const alreadyOnRoute = (place: Place) =>
     onRoute.has(place.id) ||
     routeCoords.some((coord) => haversineMiles(place.coord, coord) < SAME_PLACE_MILES)
 
   // Itinerary mode draws a sticker for every place on the route, alongside the
   // landmarks that are scenery rather than stops. Adding a landmark to the
   // route drops it from that list so it isn't drawn twice.
+  // The side is decided per place against the line actually drawn, so a label
+  // never lies along the route it belongs to.
   const routeStickers = itinerary.flatMap((item) => {
     const place = findPlace(item.id)
-    return place ? [stickerForPlace(place)] : []
+    return place ? [{ ...stickerForPlace(place), labelSide: labelSideFor(place.coord, path) }] : []
   })
   const stickers = [...STICKERS.filter((s) => !onRoute.has(s.id)), ...routeStickers]
 
-  const toChip = ({ id, emoji, name, coord }: SavedPlace) => ({
+  const toChip = ({ id, emoji, name, coord }: Place & { emoji?: string }) => ({
     id,
     emoji: emoji ?? emojiFor(name),
     name,
@@ -397,6 +410,12 @@ export function MapCanvas() {
 
   // Everything Discover lists, wearing the emoji for what it is.
   const discoverChips = discover.filter((p) => !alreadyOnRoute(p)).map(toChip)
+
+  // A gem is worth a marker even when its place belongs to the curated rail
+  // rather than the saved list the chips are drawn from.
+  const gemChips = CURATED_PLACES.filter(
+    (p) => hasGem(p.id) && !alreadyOnRoute(p) && !discover.some((d) => d.id === p.id),
+  ).map(toChip)
 
   // The tier the sheet doesn't list. These are real places, so they open like
   // anything else; without Places to ask, the map falls back to plain scenery.
@@ -432,7 +451,7 @@ export function MapCanvas() {
           stickers={isItinerary && settings.showStickers ? stickers : []}
           // Chips follow whatever Discover is showing, so real places land on
           // their real coordinates and gems key off the same ids.
-          chips={isDiscover && settings.showPins ? discoverChips : []}
+          chips={isDiscover && settings.showPins ? [...discoverChips, ...gemChips] : []}
           pois={isDiscover && settings.showPois ? ambientPois : []}
           stops={itineraryStops}
           onOpenPlace={openPlace}

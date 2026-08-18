@@ -86,11 +86,6 @@
   cursor: default;
 }
 
-.pill.is-gem {
-  background: #f0e4ff;
-  color: #4c1d95;
-}
-
 .section-label {
   margin: 0;
   font-size: 14px;
@@ -148,15 +143,11 @@
   display: inline-flex;
 }
 
+/* The gem trails the line rather than leading it, so a row reads as its rating
+   first and what you made of it second. */
 .rating-gem {
-  width: 19px;
-  height: 19px;
   flex: none;
-}
-
-.rating-sm .rating-gem {
-  width: 15px;
-  height: 15px;
+  white-space: nowrap;
 }
 
 .toast {
@@ -816,11 +807,66 @@
 }
 
 .photo-collage {
+  position: relative;
   display: flex;
   gap: 4px;
   height: 220px;
   border-radius: 16px;
   overflow: hidden;
+}
+
+/* Both overlays sit on the lead photo: what other people made of the place,
+   over the place itself. */
+.collage-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 9px;
+  line-height: 1.4;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.collage-note {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 235px;
+  height: 78px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 17px;
+  border-radius: 8px;
+  background: var(--blue-container);
+}
+
+.collage-note-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.collage-note-by {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 10px;
+  line-height: 12px;
+  font-weight: 500;
+}
+
+.collage-note-by img {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 0.5px solid #fff;
+  border-radius: 999px;
+  object-fit: cover;
 }
 
 .collage-main {
@@ -1256,4 +1302,469 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ---------- Post-trip actions ---------- */
+
+/* Expands inside the card rather than floating over it, so the row it asks
+   about stays readable directly above. */
+.post-trip {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 27px;
+  background: var(--cyan-container-light);
+  animation: post-trip-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes post-trip-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.post-trip-title {
+  margin: 0;
+  font-size: 14px;
+  color: #000;
+}
+
+.post-trip-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.post-trip-gem {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* ---------- Full-screen overlays ---------- */
+
+/* The gem and review screens take the whole phone, over the map and sheet. */
+.screen-over {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  animation: screen-in 240ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Add a hidden gem ---------- */
+
+.gem-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 20px 16px;
+}
+
+.gem-badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--cyan-container-light);
+}
+
+.gem-badge img {
+  width: 40px;
+  height: auto;
+}
+
+.gem-close {
+  position: absolute;
+  top: 0;
+  right: 20px;
+}
+
+.gem-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gem-titles h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.208px;
+  color: var(--ink-primary);
+}
+
+.gem-titles p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 24px;
+  color: var(--ink-secondary);
+}
+
+.gem-audience {
+  position: relative;
+  align-self: flex-start;
+}
+
+.gem-audience-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 8px 6px 8px 12px;
+  border-radius: 20px;
+  background: var(--surface-nav);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.gem-audience-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 2;
+  min-width: 160px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.gem-audience-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.gem-audience-menu button.is-on {
+  background: var(--cyan-container-light);
+  color: var(--cyan-on);
+}
+
+.gem-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+  padding: 24px 16px 0;
+  overflow-y: auto;
+  border-top: 1px solid #e8eaed;
+}
+
+.gem-blurb {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gem-blurb h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #000;
+}
+
+.gem-blurb p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: #6f6f6f;
+}
+
+.gem-photos {
+  display: flex;
+  gap: 6px;
+  height: 115px;
+}
+
+.gem-photo {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border-radius: 11.53px;
+  overflow: hidden;
+}
+
+.gem-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* An unchosen photo shows the empty ring, so every tile says which it is
+   rather than only the chosen ones being marked. */
+.gem-photo-check {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1.4px solid #fff;
+  color: var(--teal-primary);
+}
+
+.gem-photo.is-on .gem-photo-check {
+  border-color: transparent;
+  background: #fff;
+}
+
+.gem-add {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 83px;
+  height: 115px;
+  border: 1px dashed var(--drag-handle);
+  border-radius: 11.53px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.gem-note {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  height: 130px;
+  padding: 10px 9px;
+  border: 1px solid rgba(116, 119, 117, 0.16);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.gem-note-avatar {
+  flex: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.gem-note textarea {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--ink-primary);
+  resize: none;
+  outline: none;
+}
+
+.gem-note textarea::placeholder {
+  color: #747775;
+}
+
+.gem-note-count {
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #747775;
+}
+
+.gem-done {
+  padding: 16px 16px 24px;
+}
+
+.gem-done-btn {
+  width: 100%;
+  padding: 14px 40px;
+  background: var(--teal-primary);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+/* ---------- Write a review ---------- */
+
+.review-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.review-head h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.176px;
+  color: var(--ink-primary);
+}
+
+.review-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 0 16px;
+  overflow-y: auto;
+}
+
+.review-poster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-poster img {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.review-poster-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.review-poster-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.review-poster-scope {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.review-info {
+  flex: none;
+  color: var(--ink-secondary);
+}
+
+.review-stars {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+}
+
+.review-star {
+  padding: 0;
+  color: #dadce0;
+  transition: transform 120ms ease;
+}
+
+.review-star.is-on {
+  color: #fbbc04;
+}
+
+.review-star:active {
+  transform: scale(0.9);
+}
+
+.review-text {
+  min-height: 78px;
+  padding: 14px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 10px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink-primary);
+  resize: none;
+  outline: none;
+}
+
+.review-text::placeholder {
+  color: var(--ink-secondary);
+}
+
+.review-photos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 999px;
+  background: var(--cyan-ai);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--cyan-on);
+}
+
+.review-q {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #eef1f3;
+}
+
+.review-q p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-primary);
+}
+
+.review-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-chip {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--ink-primary);
+}
+
+.review-chip.is-on {
+  border-color: var(--cyan-on);
+  background: var(--cyan-soft);
+  color: var(--cyan-on);
+}
+
+.review-post {
+  padding: 16px;
+}
+
+.review-post-btn {
+  width: 100%;
+  padding: 14px 40px;
+  background: var(--teal-primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
 }

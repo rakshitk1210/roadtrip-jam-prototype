@@ -13,21 +13,47 @@ export interface Place {
   name: string
   /** Shown on the map sticker when it differs from the place name. */
   mapLabel?: string
+  /**
+   * The name the place goes by on its own screens, where there is room to
+   * spell it out. List rows stay on the short `name`.
+   */
+  formalName?: string
   hours?: string
+  /**
+   * The single line under the name on the map, once the zoom is close enough to
+   * read it. Authored rather than derived: what is worth saying about a stop is
+   * a judgement, not a rating threshold.
+   */
+  mapDetail?: string
   rating: number
   reviews: number
   coord: LngLat
   /** Lead photo first — it doubles as the collage hero. */
   photos: [string, string, string]
+  /** Your own shots of the place, offered up when marking it a gem. */
+  gemPhotos?: [string, string, string]
   thumb: string
   knowBeforeYouGo: [string, string]
+  /**
+   * The richer cafe sheet: the name spelled out, the distance on the rating
+   * line, and the curated badge and a friend's note over the photos. Places
+   * without it keep the plain sheet, hours line and all.
+   */
+  detail?: {
+    title: string
+    note: { text: string; author: string; avatar: string }
+  }
 }
 
 export const KANGAROO: Place = {
   id: 'kangaroo',
   name: 'Outback Kangaroo Zoo',
   mapLabel: 'Outback Kangaroo farm',
+  formalName: 'The Outback Kangaroo Farm',
   hours: 'Opens 9:30am Thu',
+  // It arrives as the curated card you just read, and loses this line to the
+  // gem the moment you mark it as one.
+  mapDetail: '🕘 Recently viewed',
   rating: 4.8,
   reviews: 198,
   coord: [-122.1379, 48.2264], // Arlington, WA — on the I-5 leg north
@@ -35,6 +61,11 @@ export const KANGAROO: Place = {
     '/assets/kangaroo-photo-1.jpg',
     '/assets/kangaroo-photo-2.jpg',
     '/assets/kangaroo-photo-3.jpg',
+  ],
+  gemPhotos: [
+    '/assets/kangaroo-gem-photo-1.jpg',
+    '/assets/kangaroo-gem-photo-2.jpg',
+    '/assets/kangaroo-gem-photo-3.jpg',
   ],
   thumb: '/assets/thumb-kangaroo.jpg',
   knowBeforeYouGo: [
@@ -46,7 +77,10 @@ export const KANGAROO: Place = {
 export interface Sticker {
   id: string
   label: string
-  sublabel?: string
+  /** The one-line note under the name, shown from the detail zoom in. */
+  detail?: string
+  /** Opening hours, the last line to arrive and only at the closest zoom. */
+  hours?: string
   image: string
   coord: LngLat
   /** Sticker width in CSS px at zoom 11. */
@@ -161,7 +195,26 @@ export function stickerArtFor(place: { id: string; name: string }): StickerArt {
 }
 
 /** Width of an itinerary sticker in CSS px at zoom 11. */
-export const ITINERARY_STICKER_WIDTH = 38
+export const ITINERARY_STICKER_WIDTH = 57
+
+/**
+ * What a sticker says, by zoom. Far out it is artwork alone; each step in adds
+ * one line, so zooming reads as asking the map for more rather than as the
+ * labels simply being there the whole time.
+ */
+export const STICKER_DETAIL_ZOOM = {
+  name: 9.5,
+  detail: 11.5,
+  hours: 13,
+} as const
+
+/**
+ * How much a sticker grows at this zoom, so text drawn off the sticker — the
+ * stop labels Discover uses instead — can be sized to match it.
+ */
+export function stickerScaleFor(zoom: number, sizeScale = 1): number {
+  return Math.min(1.2, Math.max(0.72, 0.72 + (zoom - 8) * 0.12)) * sizeScale
+}
 
 /** Turns a place into the sticker the itinerary map draws for it. */
 export function stickerForPlace(place: Place): Sticker {
@@ -169,6 +222,8 @@ export function stickerForPlace(place: Place): Sticker {
   return {
     id: place.id,
     label: place.mapLabel ?? place.name,
+    detail: place.mapDetail,
+    hours: place.hours,
     image: art.src,
     ratio: art.ratio,
     coord: place.coord,
@@ -221,10 +276,6 @@ export const EMOJI_POIS: { id: string; emoji: string; coord: LngLat }[] = [
   { id: 'newhalem-maples', emoji: '🍁', coord: [-121.2571, 48.6712] },
 ]
 
-/** Zoom at which the emoji POIs fade in. */
-export const POI_ZOOM = 11.5
-
-
 /** A saved place is a full Place plus the friend who saved it. */
 export interface SavedPlace extends Place {
   avatar: string
@@ -263,6 +314,7 @@ export const SAVED: SavedPlace[] = [
     id: 'mountain-view-cafe',
     name: 'Mountain View Café',
     hours: 'Opens 7:00am Thu',
+    mapDetail: '🕘 Recently viewed',
     rating: 4.8,
     reviews: 198,
     coord: [-121.4404, 48.6538], // Marblemount, last coffee before the pass
@@ -279,6 +331,7 @@ export const SAVED: SavedPlace[] = [
     id: 'diablo-lake-hike',
     name: 'Diablo lake hike',
     hours: 'Open 24 hours',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.8,
     reviews: 198,
     coord: [-121.1341, 48.7142],
@@ -295,6 +348,7 @@ export const SAVED: SavedPlace[] = [
     id: 'sunset-beach-bbq',
     name: 'Sunset Beach BBQ',
     hours: 'Opens 11:30am Thu',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.7,
     reviews: 152,
     coord: [-122.3312, 48.0312], // Everett waterfront
@@ -311,6 +365,7 @@ export const SAVED: SavedPlace[] = [
     id: 'historic-downtown',
     name: 'Historic Downtown Tour',
     hours: 'Tours 10am & 2pm',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.9,
     reviews: 234,
     coord: [-122.3341, 48.4212], // Mount Vernon
@@ -327,6 +382,7 @@ export const SAVED: SavedPlace[] = [
     id: 'riverbend-kayaking',
     name: 'Riverbend Kayaking',
     hours: 'Opens 9:00am Thu',
+    mapDetail: '🕘 Recently viewed',
     rating: 4.6,
     reviews: 89,
     coord: [-121.7512, 48.5361], // Skagit River near Concrete
@@ -347,6 +403,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'kayak-rental',
     name: 'Kayak rental',
     hours: 'Opens 9:00am Thu',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.8,
     reviews: 198,
     coord: [-121.9412, 48.5218], // Baker Lake turn-off
@@ -361,6 +418,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'silver-stream',
     name: 'Silver Stream Trail',
     hours: 'Open sunrise to sunset',
+    mapDetail: '🕘 Recently viewed',
     rating: 4.8,
     reviews: 198,
     coord: [-121.6294, 48.5423], // Rockport, off SR-20
@@ -375,6 +433,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'rockport-state-park',
     name: 'Rockport State Park',
     hours: 'Open 8:00am to dusk',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.7,
     reviews: 375,
     coord: [-121.6156, 48.4877],
@@ -389,6 +448,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'nc-visitor-center',
     name: 'North Cascades Visitor Center',
     hours: 'Opens 9:00am Thu',
+    mapDetail: '🕘 Recently viewed',
     rating: 4.7,
     reviews: 1098,
     coord: [-121.2667, 48.6663], // Newhalem
@@ -403,6 +463,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'ladder-creek-falls',
     name: 'Ladder Creek Falls',
     hours: 'Open 24 hours',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.7,
     reviews: 496,
     coord: [-121.2394, 48.6754],
@@ -417,6 +478,7 @@ export const SEEDED_STOPS: Place[] = [
     id: 'diablo-lake-vista',
     name: 'Diablo Lake Vista Point',
     hours: 'Open 24 hours',
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.9,
     reviews: 3858,
     coord: [-121.0974, 48.7099], // The turquoise overlook on SR-20
@@ -461,20 +523,31 @@ export const CURATED_PLACES: Place[] = [
     id: 'kona-kitchen',
     name: 'Kona Kitchen',
     hours: 'Opens 11:00am Thu',
+    // Only read if its gem is ever taken back, which the gem line covers today.
+    mapDetail: '⭐ Top rated nearby',
     rating: 4.6,
     reviews: 1288,
     coord: [-122.3233564, 47.6906269], // 8501 5th Ave NE, Seattle
     thumb: PADDLER,
     photos: [PADDLER, LAKE, KAYAK],
     knowBeforeYouGo: [
-      'The loco moco is the order — it sells out on weekend mornings',
-      'Street parking on 5th is tight, but the lot behind the building is free',
+      'Reviewers highlight the massive portions, so you may want to share or take some home',
+      'Fans of the loco moco love customizing their plate with flavorful additions like kimchi',
     ],
+    detail: {
+      title: 'Kona Kitchen - Seattle',
+      note: {
+        text: 'The great grandson of Chozen from Cobra Kai was our waiter!',
+        author: 'Cindy marked as a Hidden Gem',
+        avatar: '/assets/cindy.png',
+      },
+    },
   },
   {
     id: 'kone-bar-grill',
     name: 'Kone Bar and Grill',
     hours: 'Opens 12:00pm Thu',
+    mapDetail: '🕘 Recently viewed',
     rating: 4.5,
     reviews: 478,
     coord: [-122.2015, 47.9781], // Everett, first stop out of the city
@@ -533,5 +606,14 @@ export const CURATED_RAIL: CuratedCard[] = [
   { placeId: 'kone-bar-grill', badge: '🌱 Vegetarian-Friendly', distanceMi: 1.5 },
   { placeId: 'diablo-lake-hike', badge: '✅ Must Do', distanceMi: 1.5 },
 ]
+
+/**
+ * The curated card for a place, if it has one. A cafe sheet reads its badge and
+ * distance from here rather than keeping its own copy, so the sheet and the
+ * card can never quote different numbers for the same place.
+ */
+export function curatedCard(id: string): CuratedCard | undefined {
+  return CURATED_HERO.placeId === id ? CURATED_HERO : CURATED_RAIL.find((c) => c.placeId === id)
+}
 
 

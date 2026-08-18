@@ -45,6 +45,30 @@ export function detourFromRoute(coord: LngLat): number {
   return haversineMiles(coord, routes.direct.coordinates[nearestIndex(coord)] as LngLat)
 }
 
+/**
+ * How far a label reaches from its sticker, as ground distance. A label is a
+ * fixed pixel width, so its reach over the ground shrinks as you zoom in; this
+ * is sized for zoom 11 to 12, where the labels are legible in the first place.
+ * A constant rather than a projection, so labels don't swap sides mid-pinch.
+ */
+const LABEL_REACH_MILES = 5
+
+/**
+ * Which side of a stop its label sits on: away from the route, so the text is
+ * not laid across the line. Counts route vertices within reach on either side
+ * and sends the label to the emptier one, keeping right on a tie.
+ */
+export function labelSideFor(coord: LngLat, line: number[][]): 'left' | 'right' {
+  let east = 0
+  let west = 0
+  for (const vertex of line) {
+    if (haversineMiles(coord, vertex as LngLat) > LABEL_REACH_MILES) continue
+    if (vertex[0] > coord[0]) east++
+    else west++
+  }
+  return east > west ? 'left' : 'right'
+}
+
 /** Formats a detour the way the rows read: `1.5 mi`. */
 export function formatMiles(miles: number): string {
   return `${miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi`
