@@ -52,9 +52,12 @@
 
 /* ---------- Discover emoji ---------- */
 
-/* The white disc every Discover marker sits on, at both of its sizes. */
+/* The white disc every Discover marker sits on, at both of its sizes. One coin
+   for both: a saved place and an opened POI are the same object at different
+   moments, and the glyph and the pinprick are cut from it. */
 .emoji-chip,
 .emoji-poi {
+  --disc: 26.4px;
   position: relative;
   display: grid;
   place-items: center;
@@ -66,8 +69,8 @@
 }
 
 .emoji-chip {
-  width: 24px;
-  height: 24px;
+  width: var(--disc);
+  height: var(--disc);
   transition: transform 140ms ease;
 }
 
@@ -82,17 +85,17 @@
 }
 
 .chip-glyph {
-  font-size: 12px;
+  font-size: calc(var(--disc) / 2);
   line-height: 1;
-  letter-spacing: -0.36px;
+  letter-spacing: -0.03em;
 }
 
 /* ---------- Ambient POIs ---------- */
 
 /* Far out these are pinpricks: something is there, but not what. */
 .emoji-poi {
-  width: 6px;
-  height: 6px;
+  width: calc(var(--disc) / 4);
+  height: calc(var(--disc) / 4);
   overflow: hidden;
   transition:
     width 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
@@ -108,8 +111,8 @@
 
 /* Zoom in and the dot opens into whatever it was hiding. */
 .emoji-poi.is-expanded {
-  width: 24px;
-  height: 24px;
+  width: var(--disc);
+  height: var(--disc);
 }
 
 /* Only once open — see AmbientPoi for why a pinprick stays untappable. */
@@ -129,17 +132,24 @@
 
 /* ---------- Stickers ---------- */
 
+/* `--sticker-dy` is how far the declutter pass had to move this one to clear
+   its neighbours. It rides in every transform below so the artwork and its
+   text, which are one piece, always move together. */
 .sticker {
   display: flex;
   align-items: center;
   gap: 4px;
-  transform: translateX(-30%);
+  transform: translate(-30%, var(--sticker-dy, 0px));
+  transition: transform 200ms ease;
 }
 
-/* Near the right edge the label reads inward instead of off-screen. */
+/* Near the right edge, or where a neighbour is in the way, the label reads
+   inward instead of off-screen. Every sticker is anchored by its left edge, so
+   sitting on the west side means backing up by its own width: the flip is then
+   a class away, with no overlay to tear down and rebuild. */
 .sticker.label-left {
   flex-direction: row-reverse;
-  transform: translateX(30%);
+  transform: translate(-70%, var(--sticker-dy, 0px));
 }
 
 .sticker.label-left .sticker-text {
@@ -151,13 +161,13 @@
    label sit beside it as one piece rather than straddling it. The dot reaches
    6.5px from the coordinate, and 5.5px of clearance puts the group at 12px. */
 .sticker.has-stop {
-  transform: translateX(12px);
+  transform: translate(12px, var(--sticker-dy, 0px));
 }
 
-/* Mirrored: anchored by its right edge, and row-reverse already puts the
+/* Mirrored: backed up past its own width, and row-reverse already puts the
    artwork on the inside, so the group still reads outward from the dot. */
 .sticker.label-left.has-stop {
-  transform: translateX(-12px);
+  transform: translate(calc(-100% - 12px), var(--sticker-dy, 0px));
 }
 
 .sticker.is-interactive {

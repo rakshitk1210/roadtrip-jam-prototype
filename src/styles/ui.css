@@ -103,6 +103,19 @@
   color: var(--ink-secondary);
 }
 
+.rating-cluster {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rating-dot,
+.rating-suffix,
+.rating-gem {
+  flex: none;
+  white-space: nowrap;
+}
+
 /* Rating sits beside a fixed-width action, so it truncates rather than
    sliding underneath it. */
 .itin-text,
@@ -116,7 +129,7 @@
   white-space: nowrap;
 }
 
-.rating-lg {
+.rating-lg .rating-cluster {
   gap: 4px;
 }
 
@@ -130,24 +143,24 @@
   font-size: 15px;
 }
 
-.rating-sm .rating-value {
+.rating-sm {
+  height: 20px;
   font-size: 12px;
+  line-height: 16px;
   font-weight: 400;
 }
 
-.rating-sm .rating-count {
+.rating-sm .rating-value,
+.rating-sm .rating-count,
+.rating-sm .rating-dot,
+.rating-sm .rating-suffix,
+.rating-sm .rating-gem {
   font-size: 12px;
+  line-height: 16px;
 }
 
 .stars {
   display: inline-flex;
-}
-
-/* The gem trails the line rather than leading it, so a row reads as its rating
-   first and what you made of it second. */
-.rating-gem {
-  flex: none;
-  white-space: nowrap;
 }
 
 .toast {
@@ -374,28 +387,39 @@
   pointer-events: auto;
 }
 
+/* Two 108px columns (Figma's 102px on a 379px frame, scaled to the 402px
+   phone) with the time and the icons centred in each. flex: 1 stretched those
+   columns across the whole bar and parked both groups too far inward. */
 .status-bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
-  padding: 21px 16px 19px;
+  padding: 20px 16px 18px;
   background: rgba(255, 255, 255, 0.03);
 }
 
 .status-time {
-  flex: 1;
-  text-align: center;
-  font-size: 17px;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 108px;
+  padding-top: 2px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 22px;
+  line-height: 21px;
+  text-align: center;
 }
 
 .status-levels {
   display: flex;
-  flex: 1;
+  flex: none;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  width: 108px;
+  gap: 6.6px;
+  padding-top: 1px;
 }
 
 .title-row {
@@ -481,11 +505,16 @@
 
 /* Padding on a flex item that also scrolls is ignored for scroll height, so
    the last row sat under the floating tab pill. A trailing block is content,
-   and is what actually lets either tab scroll clear of it. */
+   and is what actually lets either tab scroll clear of it.
+
+   The sheet is laid out at its tallest and translated down, so at every snap
+   but full a slice of this container hangs below the screen. The spacer has to
+   cover that slice before it counts for anything, then the 88px the tab pill
+   occupies, and then a margin so the last row clears rather than touches. */
 .sheet-body::after {
   content: '';
   display: block;
-  height: 160px;
+  height: calc(var(--sheet-hidden, 0px) + 104px);
 }
 
 .sheet-detail .sheet-body {
@@ -815,39 +844,43 @@
   overflow: hidden;
 }
 
-/* Both overlays sit on the lead photo: what other people made of the place,
-   over the place itself. */
-.collage-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.5);
-  font-size: 9px;
-  line-height: 1.4;
-  color: #fff;
-  white-space: nowrap;
-}
-
 .collage-note {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 235px;
-  height: 78px;
+  width: 261px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   padding: 14px 17px;
   border-radius: 8px;
   background: var(--blue-container);
 }
 
 .collage-note-text {
+  position: relative;
   margin: 0;
-  font-size: 12px;
-  line-height: 16px;
+  padding: 0 12px 0 10px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-primary);
+}
+
+.collage-quote {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+}
+
+.collage-quote.is-open {
+  left: 0;
+  top: 0;
+  transform: rotate(180deg);
+}
+
+.collage-quote.is-close {
+  left: 208px;
+  top: 20px;
 }
 
 .collage-note-by {
@@ -855,16 +888,16 @@
   align-items: center;
   gap: 5px;
   margin: 0;
-  font-size: 10px;
-  line-height: 12px;
-  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ink-secondary);
 }
 
 .collage-note-by img {
   flex: none;
-  width: 12px;
-  height: 12px;
-  border: 0.5px solid #fff;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
   object-fit: cover;
 }
@@ -1172,10 +1205,10 @@
 }
 
 .curated-badge-avatar {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
-  border: 1px solid #fff;
+  border: 1px solid rgba(0, 0, 0, 0.5);
   object-fit: cover;
 }
 
@@ -1223,13 +1256,16 @@
 /* Surface/Drag Handle is what Figma uses for the overlaid metadata. */
 .curated-card .rating-value,
 .curated-card .rating-count,
-.curated-card .rating-suffix {
+.curated-card .rating-suffix,
+.curated-card .rating-dot,
+.curated-card .rating-gem {
   color: var(--drag-handle);
 }
 
 .is-hero .rating-value,
 .is-hero .rating-count,
-.is-hero .rating-suffix {
+.is-hero .rating-suffix,
+.is-hero .rating-dot {
   font-size: 14px;
   line-height: 20px;
 }

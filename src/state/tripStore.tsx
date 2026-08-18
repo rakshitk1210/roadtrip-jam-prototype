@@ -39,6 +39,7 @@ type Action =
   | { type: 'closeReview' }
   | { type: 'clearToast' }
   | { type: 'clearAdded' }
+  | { type: 'clearGemmed' }
   | { type: 'setDiscover'; result: DiscoverResult }
   | { type: 'setOverrides'; overrides: Record<string, PlaceOverride> }
   | { type: 'enterSelect' }
@@ -101,6 +102,13 @@ const move = <T,>(list: T[], from: number, to: number): T[] => {
   return next
 }
 
+/**
+ * Gems the trip arrives with: places other people found, not ones you marked.
+ * Marking is the only way a gem is added at runtime, so what is not seeded here
+ * is yours, and the map says so.
+ */
+const SEEDED_GEMS = ['kona-kitchen']
+
 const initialState: TripState = {
   screen: 'you',
   tab: 'itinerary',
@@ -119,7 +127,8 @@ const initialState: TripState = {
   itineraryChanged: false,
   // Kona Kitchen arrives already gemmed, which is what its curated card has
   // been claiming all along — the map just never agreed with it.
-  gems: ['kona-kitchen'],
+  gems: [...SEEDED_GEMS],
+  gemmedId: null,
   toast: null,
   // The designed list renders immediately and stands in whenever Places is
   // unavailable, so Discover is never empty. There is no designed stand-in for
@@ -167,6 +176,8 @@ function reducer(state: TripState, action: Action): TripState {
       return {
         ...state,
         gems: on ? state.gems.filter((g) => g !== action.id) : [...state.gems, action.id],
+        // Marking is worth seeing on the map; unmarking has nothing to show.
+        gemmedId: on ? null : action.id,
         toast: on ? 'Removed from your gems' : 'Marked as a gem 💎',
       }
     }
@@ -188,6 +199,8 @@ function reducer(state: TripState, action: Action): TripState {
       return { ...state, toast: null }
     case 'clearAdded':
       return { ...state, addedId: null }
+    case 'clearGemmed':
+      return { ...state, gemmedId: null }
     case 'setDiscover':
       return { ...state, discover: action.result.listed, ambient: action.result.ambient }
     case 'setOverrides':
@@ -366,7 +379,9 @@ export function TripProvider({ children }: { children: ReactNode }) {
       closeReview: () => dispatch({ type: 'closeReview' }),
       clearToast: () => dispatch({ type: 'clearToast' }),
       clearAdded: () => dispatch({ type: 'clearAdded' }),
+      clearGemmed: () => dispatch({ type: 'clearGemmed' }),
       hasGem: (id) => state.gems.includes(id),
+      markedGem: (id) => state.gems.includes(id) && !SEEDED_GEMS.includes(id),
       findPlace,
       enterSelect: () => dispatch({ type: 'enterSelect' }),
       exitSelect: () => dispatch({ type: 'exitSelect' }),

@@ -55,7 +55,7 @@ function SavedRow({ place, quote }: { place: SavedPlace; quote?: typeof SAVED_QU
             stars="single"
             suffix={[formatMiles(detourFromRoute(place.coord)), place.category]
               .filter(Boolean)
-              .join(' · ')}
+              .join(' • ')}
           />
         </div>
         {/* Acts on its own, so it swallows the row tap. */}
@@ -111,9 +111,8 @@ function CuratedTile({ card, hero = false }: { card: CuratedCard; hero?: boolean
       <img className="curated-photo" src={card.image ?? place.thumb} alt="" />
 
       <div className="curated-badges">
-        <span className="curated-badge">{card.badge}</span>
-        {/* Where the badge is somebody's word, their face sits beside it. */}
         {card.avatar && <img className="curated-badge-avatar" src={card.avatar} alt="" />}
+        <span className="curated-badge">{card.badge}</span>
       </div>
 
       <div className="curated-overlay">
@@ -128,7 +127,7 @@ function CuratedTile({ card, hero = false }: { card: CuratedCard; hero?: boolean
             <Rating
               rating={place.rating}
               reviews={place.reviews}
-              gem={hasGem(place.id)}
+              gem={!card.avatar && hasGem(place.id)}
               stars="single"
               suffix={`${card.distanceMi} mi`}
             />

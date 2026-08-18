@@ -58,7 +58,7 @@ export function PlaceDetailSheet({ placeId }: { placeId: string }) {
             onClick={() => addToItinerary(place.id, 'end')}
             disabled={inItinerary}
           >
-            <Icon name="add" />
+            <Icon name={inItinerary ? 'check' : 'add'} />
             {inItinerary ? 'In itinerary' : 'Add to itinerary'}
           </button>
         )}
@@ -71,16 +71,17 @@ export function PlaceDetailSheet({ placeId }: { placeId: string }) {
           <img src={place.photos[2]} alt="" />
         </div>
         {cafe && (
-          <>
-            {card && <span className="collage-badge">{card.badge}</span>}
-            <div className="collage-note">
-              <p className="collage-note-text">“{cafe.note.text}”</p>
-              <p className="collage-note-by">
-                <img src={cafe.note.avatar} alt="" />
-                {cafe.note.author}
-              </p>
-            </div>
-          </>
+          <div className="collage-note">
+            <p className="collage-note-text">
+              <img className="collage-quote is-open" src="/assets/quote-mark.svg" alt="" />
+              {cafe.note.text}
+              <img className="collage-quote is-close" src="/assets/quote-mark.svg" alt="" />
+            </p>
+            <p className="collage-note-by">
+              <img src={cafe.note.avatar} alt="" />
+              {cafe.note.author}
+            </p>
+          </div>
         )}
       </div>
 

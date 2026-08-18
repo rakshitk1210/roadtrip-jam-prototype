@@ -89,6 +89,11 @@ export function BottomSheet({ snap, onSnapChange, header = null, children, class
         height: fullPx,
         transform: `translateY(${translate}px)`,
         transition: drag ? 'none' : 'transform 340ms cubic-bezier(0.2, 0, 0, 1)',
+        // How much of the sheet hangs below the screen at this snap, which is
+        // what the scrolling content has to clear before it reaches the edge
+        // anyone can actually see. Read from the snap rather than the live drag,
+        // so the content still doesn't reflow under the finger.
+        ['--sheet-hidden' as string]: `${translateFor(snap)}px`,
       }}
     >
       <div
