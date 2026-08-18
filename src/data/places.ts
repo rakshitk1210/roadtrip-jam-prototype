@@ -158,6 +158,7 @@ export const STICKER_ART = {
   food: { src: '/assets/sticker-art-burger.svg', ratio: 73 / 52.1429 },
   mocoloco: { src: '/assets/mocoloco.svg', ratio: 358 / 221 },
   alpaca: { src: '/assets/alpaca.svg', ratio: 85 / 54 },
+  blueBird: { src: '/assets/sticker-art-blue-bird.png', ratio: 219 / 138 },
 } satisfies Record<string, StickerArt>
 
 export type StickerArtId = keyof typeof STICKER_ART
@@ -178,6 +179,7 @@ const STICKER_ART_BY_PLACE: Record<string, StickerArtId> = {
   'historic-downtown': 'visitorCenter',
   'kona-kitchen': 'mocoloco',
   'strawberry-fields-alpaca': 'alpaca',
+  'blue-bird-cafe': 'blueBird',
 }
 
 /** Name keywords, in priority order, for places that arrive from Places. */
@@ -420,6 +422,21 @@ export const SEEDED_STOPS: Place[] = [
     ],
   },
   {
+    id: 'blue-bird-cafe',
+    name: 'Blue Bird Cafe',
+    hours: 'Opens 5:00am Thu',
+    mapDetail: '⭐ Top rated nearby',
+    rating: 4.5,
+    reviews: 184,
+    coord: [-122.1264, 48.1965], // 308 N Olympic Ave, Arlington
+    thumb: '/assets/kona-kitchen-tile.jpg',
+    photos: ['/assets/kona-kitchen-tile.jpg', PADDLER, LAKE],
+    knowBeforeYouGo: [
+      'Family-owned since 1958 — the blueberry pancakes are the order, and they sell out on weekend mornings',
+      'Free street parking on N Olympic Ave; breakfast starts at 5am if you want an early start into the mountains',
+    ],
+  },
+  {
     id: 'kayak-rental',
     name: 'Kayak rental',
     hours: 'Opens 9:00am Thu',
@@ -536,6 +553,11 @@ export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] 
     query: 'Strawberry Fields Alpaca Ranch, Arlington, WA',
     coord: [-122.0916, 48.1229],
   },
+  {
+    id: 'blue-bird-cafe',
+    query: 'Blue Bird Cafe, Arlington, WA',
+    coord: [-122.1264, 48.1965],
+  },
 ]
 
 /**
@@ -576,8 +598,8 @@ export const CURATED_PLACES: Place[] = [
     rating: 4.5,
     reviews: 478,
     coord: [-122.2015, 47.9781], // Everett, first stop out of the city
-    thumb: KAYAK,
-    photos: [KAYAK, PADDLER, LAKE],
+    thumb: '/assets/kone-bar-grill-tile.jpg',
+    photos: ['/assets/kone-bar-grill-tile.jpg', PADDLER, LAKE],
     knowBeforeYouGo: [
       'Half the menu is vegetarian, and the kitchen will veganise most of the rest',
       'The patio is heated, so it stays usable well past sunset',
@@ -629,7 +651,12 @@ export const CURATED_RAIL: CuratedCard[] = [
     avatar: '/assets/cindy.png',
     image: '/assets/kona-kitchen-tile.jpg',
   },
-  { placeId: 'kone-bar-grill', badge: '🌱 Vegetarian-Friendly', distanceMi: 1.5 },
+  {
+    placeId: 'kone-bar-grill',
+    badge: '🌱 Vegetarian-Friendly',
+    distanceMi: 1.5,
+    image: '/assets/kone-bar-grill-tile.jpg',
+  },
   { placeId: 'diablo-lake-hike', badge: '✅ Must Do', distanceMi: 1.5 },
 ]
 

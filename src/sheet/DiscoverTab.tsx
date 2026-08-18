@@ -11,15 +11,6 @@ import {
 } from '../data/places'
 import { useTrip } from '../state/tripContext'
 
-/** The category rail that replaced the chips over the map. */
-const CATEGORIES = [
-  { key: 'search', emoji: '🔎', label: 'Search' },
-  { key: 'restaurants', emoji: '🍔', label: 'Restaurants' },
-  { key: 'coffee', emoji: '☕', label: 'Coffee' },
-  { key: 'shopping', emoji: '🛍️', label: 'Shopping' },
-  { key: 'nature', emoji: '🍀', label: 'Nature' },
-]
-
 /** How many saved rows show before "View More". */
 const COLLAPSED = 4
 
@@ -154,27 +145,12 @@ function CuratedTile({ card, hero = false }: { card: CuratedCard; hero?: boolean
 
 export function DiscoverTab() {
   const { discover } = useTrip()
-  const [category, setCategory] = useState('search')
   const [expanded, setExpanded] = useState(false)
 
   const saved = expanded ? discover : discover.slice(0, COLLAPSED)
 
   return (
     <div className="discover-pane">
-      <div className="cat-rail">
-        {CATEGORIES.map((c) => (
-          <button
-            key={c.key}
-            className={`cat${category === c.key ? ' is-active' : ''}`}
-            aria-pressed={category === c.key}
-            onClick={() => setCategory(c.key)}
-          >
-            <span className="cat-emoji">{c.emoji}</span>
-            {c.label}
-          </button>
-        ))}
-      </div>
-
       <h2 className="sheet-heading">Saved list</h2>
       <div className="sheet-card">
         {saved.map((place, i) => (

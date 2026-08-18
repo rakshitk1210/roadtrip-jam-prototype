@@ -1027,12 +1027,14 @@
   to { transform: scale(1); }
 }
 
-/* Header row inside each tab: title plus its one action. */
+/* Header row inside each tab: title plus its one action. Horizontal padding is
+   20px from the sheet edge (Figma 1947:11584), so the body gutter is reversed. */
 .sheet-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: 0 -16px;
   /* The 20px handle above plus this makes Figma's 40px from the sheet edge. */
   padding: 20px 20px 8px;
 }
@@ -1054,6 +1056,17 @@
   border: 1px solid #d6d9dd;
   background: #fff;
   color: var(--ink-primary);
+}
+
+/* Itinerary "Select" — Figma 1947:11586. A filled dim pill, not an outline. */
+.pill-dim {
+  padding: 8px 12px;
+  background: var(--surface-dim);
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
 }
 
 .pill-primary {
@@ -1102,43 +1115,53 @@
   color: var(--green-badge);
 }
 
-/* ---------- Discover: category rail ---------- */
+/* ---------- Discover: header chips (Figma 1666:6720) ---------- */
 
-.cat-rail {
+.chip-rail {
   display: flex;
+  gap: 8px;
+  /* The rail runs past both edges of the sheet, so it undoes the drag zone's
+     padding and carries the 16px inset itself. */
   margin: 0 -16px;
-  padding: 0 12px;
+  /* Figma puts the chips 32px under the handle; 8px of that is the handle's own
+     margin. The bottom is the frame's 10px, which also clears the chip shadow. */
+  padding: 24px 16px 10px;
   overflow-x: auto;
   scrollbar-width: none;
+  touch-action: pan-x;
 }
 
-.cat-rail::-webkit-scrollbar {
+.chip-rail::-webkit-scrollbar {
   display: none;
 }
 
-.cat {
+.chip {
   flex: none;
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 5px 16px;
-  border-radius: 8px;
-  font-size: 12px;
-  letter-spacing: -0.36px;
+  padding: 8px 12px 8px 10px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.42px;
   /* Every label is Ink/Primary in the design — the active state is a background
      tint only, since the rail is interactive here in a way the frames don't show. */
   color: var(--ink-primary);
+  white-space: nowrap;
   transition: background 140ms ease;
 }
 
-.cat.is-active {
+.chip.is-active {
   background: var(--surface-dim);
 }
 
-.cat-emoji {
-  font-size: 24px;
-  line-height: 1;
+.chip-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
 }
 
 .view-more {
