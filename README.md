@@ -21,12 +21,16 @@ Then open http://localhost:5173. It fills the screen on a phone and renders as a
 3. **Zoom past 11.5** — 🍕 🍔 🌮 ☕ 🍦 🍩 fade in as circular chips.
 4. **Tap the Outback Kangaroo Farm sticker** — the map flies in and the detail
    sheet takes over.
-5. **Three actions** — *Add stop* re-draws the route through the place,
-   *Add to itinerary* prepends it to Morning, *Mark as Gem* drops a violet
-   diamond on the map and beside the rating. Gem toggles off on a second tap.
-6. **Close** — state persists. **On Your Route** holds *Saved*,
-   *From your friends*, and *From travel creators* (people who have never been
-   on this jam).
+5. **Two actions** — *Add stop* puts the place in the itinerary, which is what
+   re-draws the route through it, and *Mark as Gem* drops a violet diamond on the
+   map and beside the rating. Gem toggles off on a second tap.
+6. **Group the stops into days** — *Select* in the itinerary header checks rows
+   off, then *Group to a day* files them under a `Day n` heading and paints that
+   day's stretch of the route in its own colour. Rows drag by their handle, days
+   drag by their heading, and both renumber as they land; the bin drops whatever
+   is selected.
+7. **Close** — state persists. **Discover** holds the *Saved list* and
+   *Curated for your group*, over a category rail.
 
 ### Every place opens the same sheet
 
@@ -77,7 +81,9 @@ public/assets/          PNG/JPG/SVG exported from the Figma file
   Figma components carry Material's own keyword lists (`chevron_right`,
   `local_cafe`, `drag_indicator`), so the font is the same artwork at the right
   optical size and inherits `currentColor`.
-- **Type** is Roboto. Google Sans Flex, which the file uses, is not public.
+- **Type** is Google Sans Flex, the same face the Figma file uses, served from
+  Google Fonts as a variable font so one file covers every weight. Roboto stays
+  on as the fallback.
 - **Coordinates are real** — Outback Kangaroo Farm sits at its actual Arlington,
   WA location, which is why the route runs I-5 north before turning east on
   SR-20. The Figma composition places the sticker a little further north.

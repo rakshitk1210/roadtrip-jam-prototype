@@ -196,9 +196,6 @@
   padding: 8px;
 }
 
-/* Shift the phone clear of the panel rather than letting it overlap. */
-@media (min-width: 1100px) and (pointer: fine) {
-  body {
-    padding-right: 320px;
-  }
-}
+/* No body padding here on purpose: reserving 320px pushed the phone 160px off
+   centre. The panel is fixed and only 320px wide, so at the 1100px breakpoint a
+   centred 402px phone still clears it (phone ends at 751, panel starts at 780). */

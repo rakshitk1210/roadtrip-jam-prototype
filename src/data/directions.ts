@@ -6,22 +6,48 @@ import routes from './routes.json'
  * base route each one sits, rather than by the order they were tapped.
  */
 export function orderAlongRoute(stops: LngLat[]): LngLat[] {
-  const line = routes.direct.coordinates
-  const progress = (p: LngLat) => {
-    let best = Infinity
-    let index = 0
-    for (let i = 0; i < line.length; i++) {
-      const dx = line[i][0] - p[0]
-      const dy = line[i][1] - p[1]
-      const d = dx * dx + dy * dy
-      if (d < best) {
-        best = d
-        index = i
-      }
+  return [...stops].sort((a, b) => nearestIndex(a) - nearestIndex(b))
+}
+
+/** Index of the route vertex nearest a point — the shared basis for ordering and detours. */
+function nearestIndex(p: LngLat, line: number[][] = routes.direct.coordinates): number {
+  let best = Infinity
+  let index = 0
+  for (let i = 0; i < line.length; i++) {
+    const dx = line[i][0] - p[0]
+    const dy = line[i][1] - p[1]
+    const d = dx * dx + dy * dy
+    if (d < best) {
+      best = d
+      index = i
     }
-    return index
   }
-  return [...stops].sort((a, b) => progress(a) - progress(b))
+  return index
+}
+
+const EARTH_MILES = 3958.8
+const rad = (deg: number) => (deg * Math.PI) / 180
+
+export function haversineMiles(a: LngLat, b: LngLat): number {
+  const dLat = rad(b[1] - a[1])
+  const dLng = rad(b[0] - a[0])
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[1])) * Math.cos(rad(b[1])) * Math.sin(dLng / 2) ** 2
+  return 2 * EARTH_MILES * Math.asin(Math.sqrt(h))
+}
+
+/**
+ * How far off the drive a place sits — the distance to the nearest point on the
+ * route, which is what "is this worth the detour" actually asks. Pure maths over
+ * the cached line, so it costs no API call.
+ */
+export function detourFromRoute(coord: LngLat): number {
+  return haversineMiles(coord, routes.direct.coordinates[nearestIndex(coord)] as LngLat)
+}
+
+/** Formats a detour the way the rows read: `1.5 mi`. */
+export function formatMiles(miles: number): string {
+  return `${miles < 10 ? miles.toFixed(1) : Math.round(miles)} mi`
 }
 
 const waypoint = ([lng, lat]: LngLat) => ({ location: { latLng: { latitude: lat, longitude: lng } } })

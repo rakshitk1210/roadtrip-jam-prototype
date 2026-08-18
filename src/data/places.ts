@@ -6,8 +6,7 @@ export const DESTINATION: LngLat = [-121.266, 48.6739] // North Cascades / Newha
 
 /**
  * Anything that can open the place detail sheet — the Kangaroo Farm and every
- * saved place on the route. Trip recommendations (friends, creators) are
- * itineraries rather than places and are typed separately below.
+ * saved place on the route.
  */
 export interface Place {
   id: string
@@ -52,22 +51,20 @@ export interface Sticker {
   coord: LngLat
   /** Sticker width in CSS px at zoom 11. */
   width: number
+  /** Width over height of the artwork, when it must be sized explicitly. */
+  ratio?: number
   minZoom?: number
   interactive?: boolean
   /** Which side the label sits on — `left` keeps it off the right edge. */
   labelSide?: 'left' | 'right'
 }
 
+/**
+ * Landmarks the map knows about on its own. The Kangaroo Farm is deliberately
+ * not among them: it arrives as the curated card's place, and only earns a
+ * sticker once it has been added to the itinerary.
+ */
 export const STICKERS: Sticker[] = [
-  {
-    id: 'kangaroo',
-    label: KANGAROO.mapLabel ?? KANGAROO.name,
-    sublabel: KANGAROO.hours,
-    image: '/assets/sticker-kangaroo.png',
-    coord: KANGAROO.coord,
-    width: 46,
-    interactive: true,
-  },
   {
     id: 'north-cascades',
     label: 'North Cascades',
@@ -103,7 +100,110 @@ export const STICKERS: Sticker[] = [
   },
 ]
 
-/** Eateries that only surface once you zoom past the threshold. */
+/**
+ * The sticker library, exported from the design file. There is one drawing per
+ * kind of stop rather than per stop, so the art repeats across places — which
+ * is what the design asks for until the full set is drawn.
+ *
+ * Ratios come from each SVG's own viewBox: the exports carry
+ * `preserveAspectRatio="none"`, so anything rendering them has to supply both
+ * dimensions or the drawing stretches.
+ */
+export interface StickerArt {
+  src: string
+  /** Width over height of the exported artwork. */
+  ratio: number
+}
+
+export const STICKER_ART = {
+  kangaroo: { src: '/assets/sticker-art-kangaroo.svg', ratio: 73 / 45.7467 },
+  lake: { src: '/assets/sticker-art-diablo-lake.svg', ratio: 73 / 45.0882 },
+  falls: { src: '/assets/sticker-art-falls.svg', ratio: 38.0513 / 23.3382 },
+  kayak: { src: '/assets/sticker-art-kayak.svg', ratio: 87.1009 / 54.4381 },
+  visitorCenter: { src: '/assets/sticker-art-visitor-center.svg', ratio: 72.5081 / 45.0726 },
+  food: { src: '/assets/sticker-art-burger.svg', ratio: 73 / 52.1429 },
+} satisfies Record<string, StickerArt>
+
+export type StickerArtId = keyof typeof STICKER_ART
+
+/** The art each designed place wears on the map. */
+const STICKER_ART_BY_PLACE: Record<string, StickerArtId> = {
+  kangaroo: 'kangaroo',
+  'kayak-rental': 'kayak',
+  'riverbend-kayaking': 'kayak',
+  'silver-stream': 'lake',
+  'rockport-state-park': 'lake',
+  'nc-visitor-center': 'visitorCenter',
+  'ladder-creek-falls': 'falls',
+  'diablo-lake-vista': 'lake',
+  'diablo-lake-hike': 'lake',
+  'mountain-view-cafe': 'food',
+  'sunset-beach-bbq': 'food',
+  'historic-downtown': 'visitorCenter',
+}
+
+/** Name keywords, in priority order, for places that arrive from Places. */
+const ART_KEYWORDS: [RegExp, StickerArtId][] = [
+  [/kayak|paddle|canoe|raft/i, 'kayak'],
+  [/falls|waterfall|cascade/i, 'falls'],
+  [/caf|coffee|espresso|bbq|barbecue|grill|kitchen|diner|restaurant|bakery|brewer|pizz/i, 'food'],
+  [/visitor|museum|center|centre|gallery|historic|tour/i, 'visitorCenter'],
+  [/zoo|farm|wildlife|animal/i, 'kangaroo'],
+]
+
+/** Sticker art for any place — designed by hand where we have it, guessed otherwise. */
+export function stickerArtFor(place: { id: string; name: string }): StickerArt {
+  const mapped = STICKER_ART_BY_PLACE[place.id]
+  if (mapped) return STICKER_ART[mapped]
+  const hit = ART_KEYWORDS.find(([pattern]) => pattern.test(place.name))
+  // Lake and mountain scenery is the safe default on a drive into the Cascades.
+  return STICKER_ART[hit ? hit[1] : 'lake']
+}
+
+/** Width of an itinerary sticker in CSS px at zoom 11. */
+export const ITINERARY_STICKER_WIDTH = 38
+
+/** Turns a place into the sticker the itinerary map draws for it. */
+export function stickerForPlace(place: Place): Sticker {
+  const art = stickerArtFor(place)
+  return {
+    id: place.id,
+    label: place.mapLabel ?? place.name,
+    image: art.src,
+    ratio: art.ratio,
+    coord: place.coord,
+    width: ITINERARY_STICKER_WIDTH,
+    interactive: true,
+  }
+}
+
+/** The emoji vocabulary the design uses, matched on place name or Places type. */
+const EMOJI_KEYWORDS: [RegExp, string][] = [
+  [/caf|coffee|espresso|tea house/i, '☕'],
+  [/bbq|barbecue|grill|smokehouse/i, '🍔'],
+  [/pizz/i, '🍕'],
+  [/taco|taqueria|mexican/i, '🌮'],
+  [/donut|doughnut|bakery|pastr/i, '🍩'],
+  [/ice cream|creamer|gelato/i, '🍦'],
+  [/kayak|paddle|canoe|raft/i, '🦜'],
+  [/brew|taproom|winery|cider|distiller|\bbar\b|\bpub\b/i, '🍔'],
+  [/hike|trail|park|forest|falls|lake|river|mountain|garden|scenic|viewpoint|overlook|campground|beach/i, '🍁'],
+  [/tour|historic|museum|gallery|\bart\b|\bglass\b|attraction|zoo|farm|wildlife|downtown|theat/i, '🐴'],
+  [/restaurant|kitchen|diner|eatery|burger|\bfood\b/i, '🍔'],
+]
+
+/** Fallback emoji for anything Places hands us that the vocabulary misses. */
+export const DEFAULT_EMOJI = '📍'
+
+export function emojiFor(text: string): string {
+  return EMOJI_KEYWORDS.find(([pattern]) => pattern.test(text))?.[1] ?? DEFAULT_EMOJI
+}
+
+/**
+ * Ambient places the map knows about but the Discover sheet doesn't list. They
+ * ride along as pinprick dots and resolve into emoji as you zoom in, which is
+ * what makes zooming feel like it reveals something.
+ */
 export const EMOJI_POIS: { id: string; emoji: string; coord: LngLat }[] = [
   { id: 'pizza', emoji: '🍕', coord: [-122.1608, 48.2151] },
   { id: 'burger', emoji: '🍔', coord: [-122.1489, 48.2384] },
@@ -111,25 +211,38 @@ export const EMOJI_POIS: { id: string; emoji: string; coord: LngLat }[] = [
   { id: 'coffee', emoji: '☕', coord: [-122.1704, 48.2436] },
   { id: 'icecream', emoji: '🍦', coord: [-122.1121, 48.2412] },
   { id: 'donut', emoji: '🍩', coord: [-122.1327, 48.2038] },
+  { id: 'pony-rides', emoji: '🐴', coord: [-122.0968, 48.2611] },
+  { id: 'maple-grove', emoji: '🍁', coord: [-121.9723, 48.4536] },
+  { id: 'birdwatching', emoji: '🦜', coord: [-121.5842, 48.5197] },
+  { id: 'skagit-diner', emoji: '🍔', coord: [-122.3348, 48.4194] },
+  { id: 'everett-donuts', emoji: '🍩', coord: [-122.2029, 47.9789] },
+  { id: 'concrete-coffee', emoji: '☕', coord: [-121.7476, 48.5389] },
+  { id: 'marblemount-pizza', emoji: '🍕', coord: [-121.4331, 48.5271] },
+  { id: 'newhalem-maples', emoji: '🍁', coord: [-121.2571, 48.6712] },
 ]
 
 /** Zoom at which the emoji POIs fade in. */
 export const POI_ZOOM = 11.5
 
-export interface ListItem {
-  id: string
-  name: string
-  rating: number
-  reviews: number
-  photo: string
-  avatar: string
-  byline?: string
-  handle?: string
-}
 
 /** A saved place is a full Place plus the friend who saved it. */
 export interface SavedPlace extends Place {
   avatar: string
+  /** What it wears on the Discover map. Derived from the name when absent. */
+  emoji?: string
+  /** Google's own label for the place: `Lake`, `State Park`, `Hiking Area`. */
+  category?: string
+  /** A friend's note, shown under the row in the saved list. */
+  quote?: { text: string; avatar: string }
+}
+
+/**
+ * The design puts a friend's note under the first saved row. The live list is
+ * whatever Places returns, so the quote attaches by position rather than by id.
+ */
+export const SAVED_QUOTE = {
+  text: 'You can see beautiful stars here at night',
+  avatar: '/assets/you-avatar-1.jpg',
 }
 
 /**
@@ -156,6 +269,7 @@ export const SAVED: SavedPlace[] = [
     thumb: LAKE,
     photos: [LAKE, PADDLER, KAYAK],
     avatar: '/assets/you-avatar-1.jpg',
+    emoji: '☕',
     knowBeforeYouGo: [
       'The last espresso before Newhalem — the next café is 40 minutes further up SR-20',
       'Cash only after 4pm, and the patio fills up the moment the sun clears the ridge',
@@ -171,6 +285,7 @@ export const SAVED: SavedPlace[] = [
     thumb: LAKE,
     photos: [LAKE, KAYAK, PADDLER],
     avatar: '/assets/avatar-2.png',
+    emoji: '🍁',
     knowBeforeYouGo: [
       'The overlook lot fills by 10am on weekends — the trailhead half a mile east rarely does',
       'That turquoise colour is glacial flour, and it is strongest in late summer',
@@ -186,6 +301,7 @@ export const SAVED: SavedPlace[] = [
     thumb: KAYAK,
     photos: [KAYAK, LAKE, PADDLER],
     avatar: '/assets/you-avatar-4.jpg',
+    emoji: '🍔',
     knowBeforeYouGo: [
       'Brisket usually sells out by 2pm — order it the moment you sit down',
       'Ask for a table on the west deck if you are timing this around sunset',
@@ -201,6 +317,7 @@ export const SAVED: SavedPlace[] = [
     thumb: PADDLER,
     photos: [PADDLER, LAKE, KAYAK],
     avatar: '/assets/avatar-2.png',
+    emoji: '🐴',
     knowBeforeYouGo: [
       'Runs about 90 minutes on foot with two flights of stairs and no step-free alternative',
       'Parking behind the old cannery is free for the first two hours',
@@ -216,6 +333,7 @@ export const SAVED: SavedPlace[] = [
     thumb: PADDLER,
     photos: [PADDLER, KAYAK, LAKE],
     avatar: '/assets/you-avatar-2.jpg',
+    emoji: '🦜',
     knowBeforeYouGo: [
       'Book the morning slot — the afternoon wind on the Skagit turns the paddle back into work',
       'Everything you bring gets wet, so leave anything precious in the car',
@@ -225,6 +343,20 @@ export const SAVED: SavedPlace[] = [
 
 /** The two stops the itinerary starts with, so those rows open a sheet too. */
 export const SEEDED_STOPS: Place[] = [
+  {
+    id: 'kayak-rental',
+    name: 'Kayak rental',
+    hours: 'Opens 9:00am Thu',
+    rating: 4.8,
+    reviews: 198,
+    coord: [-121.9412, 48.5218], // Baker Lake turn-off
+    thumb: PADDLER,
+    photos: [PADDLER, LAKE, KAYAK],
+    knowBeforeYouGo: [
+      'Book the morning slot — the afternoon wind on the Skagit turns the paddle back into work',
+      'Everything you bring gets wet, so leave anything precious in the car',
+    ],
+  },
   {
     id: 'silver-stream',
     name: 'Silver Stream Trail',
@@ -240,17 +372,59 @@ export const SEEDED_STOPS: Place[] = [
     ],
   },
   {
-    id: 'kayak-rental',
-    name: 'Kayak rental',
-    hours: 'Opens 9:00am Thu',
-    rating: 4.8,
-    reviews: 198,
-    coord: [-121.9412, 48.5218], // Baker Lake turn-off
-    thumb: PADDLER,
-    photos: [PADDLER, LAKE, KAYAK],
+    id: 'rockport-state-park',
+    name: 'Rockport State Park',
+    hours: 'Open 8:00am to dusk',
+    rating: 4.7,
+    reviews: 375,
+    coord: [-121.6156, 48.4877],
+    thumb: LAKE,
+    photos: [LAKE, KAYAK, PADDLER],
     knowBeforeYouGo: [
-      'Last rental goes out two hours before dusk, and they hold it strictly',
-      'Life jackets are included; dry bags are not, so bring your own',
+      'Washington State Parks need a Discover Pass on the dashboard — day passes are sold at the kiosk',
+      'The old-growth loop stays muddy long after the rest of the valley has dried out',
+    ],
+  },
+  {
+    id: 'nc-visitor-center',
+    name: 'North Cascades Visitor Center',
+    hours: 'Opens 9:00am Thu',
+    rating: 4.7,
+    reviews: 1098,
+    coord: [-121.2667, 48.6663], // Newhalem
+    thumb: LAKE,
+    photos: [LAKE, PADDLER, KAYAK],
+    knowBeforeYouGo: [
+      'Last reliable restrooms and ranger information before the pass',
+      'There is no petrol in Newhalem — fill up in Marblemount, 14 miles back',
+    ],
+  },
+  {
+    id: 'ladder-creek-falls',
+    name: 'Ladder Creek Falls',
+    hours: 'Open 24 hours',
+    rating: 4.7,
+    reviews: 496,
+    coord: [-121.2394, 48.6754],
+    thumb: KAYAK,
+    photos: [KAYAK, LAKE, PADDLER],
+    knowBeforeYouGo: [
+      'The loop climbs behind the powerhouse on stairs and a suspension bridge — not step-free',
+      'The 1920s coloured light show still runs on the falls after dark in summer',
+    ],
+  },
+  {
+    id: 'diablo-lake-vista',
+    name: 'Diablo Lake Vista Point',
+    hours: 'Open 24 hours',
+    rating: 4.9,
+    reviews: 3858,
+    coord: [-121.0974, 48.7099], // The turquoise overlook on SR-20
+    thumb: LAKE,
+    photos: [LAKE, KAYAK, PADDLER],
+    knowBeforeYouGo: [
+      'The overlook lot fills by mid-morning in summer and there is nowhere to turn round',
+      'That turquoise is glacial flour suspended in the water, and it is strongest in late summer',
     ],
   },
 ]
@@ -266,24 +440,98 @@ export const SEEDED_STOPS: Place[] = [
 export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] = [
   { id: KANGAROO.id, query: 'Outback Kangaroo Farm, Arlington, WA', coord: KANGAROO.coord },
   { id: 'diablo-lake-hike', query: 'Diablo Lake Trail, North Cascades', coord: [-121.13, 48.714] },
+  { id: 'kona-kitchen', query: 'Kona Kitchen - Seattle', coord: [-122.3233564, 47.6906269] },
+  { id: 'rockport-state-park', query: 'Rockport State Park, WA', coord: [-121.6156, 48.4877] },
+  {
+    id: 'nc-visitor-center',
+    query: 'North Cascades National Park Visitor Center, Newhalem WA',
+    coord: [-121.2667, 48.6663],
+  },
+  { id: 'ladder-creek-falls', query: 'Ladder Creek Falls, Newhalem, WA', coord: [-121.2394, 48.6754] },
+  { id: 'diablo-lake-vista', query: 'Diablo Lake Vista Point, WA', coord: [-121.0974, 48.7099] },
+]
+
+/**
+ * The two eateries the curated rail recommends. Kona Kitchen is a real Hawaiian
+ * diner in Maple Leaf; Kone Bar and Grill is invented, so it keeps its authored
+ * rating and artwork rather than being looked up.
+ */
+export const CURATED_PLACES: Place[] = [
+  {
+    id: 'kona-kitchen',
+    name: 'Kona Kitchen',
+    hours: 'Opens 11:00am Thu',
+    rating: 4.6,
+    reviews: 1288,
+    coord: [-122.3233564, 47.6906269], // 8501 5th Ave NE, Seattle
+    thumb: PADDLER,
+    photos: [PADDLER, LAKE, KAYAK],
+    knowBeforeYouGo: [
+      'The loco moco is the order — it sells out on weekend mornings',
+      'Street parking on 5th is tight, but the lot behind the building is free',
+    ],
+  },
+  {
+    id: 'kone-bar-grill',
+    name: 'Kone Bar and Grill',
+    hours: 'Opens 12:00pm Thu',
+    rating: 4.5,
+    reviews: 478,
+    coord: [-122.2015, 47.9781], // Everett, first stop out of the city
+    thumb: KAYAK,
+    photos: [KAYAK, PADDLER, LAKE],
+    knowBeforeYouGo: [
+      'Half the menu is vegetarian, and the kitchen will veganise most of the rest',
+      'The patio is heated, so it stays usable well past sunset',
+    ],
+  },
 ]
 
 /** Every place that can open the detail sheet, keyed by id. */
 export const PLACES: Record<string, Place> = Object.fromEntries(
-  [KANGAROO, ...SAVED, ...SEEDED_STOPS].map((p) => [p.id, p]),
+  [KANGAROO, ...SAVED, ...SEEDED_STOPS, ...CURATED_PLACES].map((p) => [p.id, p]),
 )
 
-/** People on this jam who have already driven some of it. */
-export const FROM_FRIENDS: ListItem[] = [
-  { id: 'friend-1', name: '2-day North Cascades trip', rating: 4.9, reviews: 41, photo: '/assets/itin-silver-stream.png', avatar: '/assets/you-avatar-1.jpg', byline: 'Jordan Blake' },
-  { id: 'friend-2', name: '1-day Cascades kayaking trip', rating: 4.7, reviews: 33, photo: '/assets/itin-kayak.png', avatar: '/assets/you-avatar-2.jpg', byline: 'Taylor Reed' },
-  { id: 'friend-3', name: 'Weekend Mount Rainier hike', rating: 4.8, reviews: 58, photo: '/assets/itin-silver-stream.png', avatar: '/assets/you-avatar-3.jpg', byline: 'Morgan Lee' },
-  { id: 'friend-4', name: 'Lake Washington paddle', rating: 4.6, reviews: 27, photo: '/assets/itin-kayak.png', avatar: '/assets/you-avatar-4.jpg', byline: 'Casey Quinn' },
+/**
+ * What the group is being pointed at. Each card names a place the detail sheet
+ * already knows, so tapping one opens the same sheet the Discover rows do; the
+ * badge is the card's own editorial line.
+ */
+export interface CuratedCard {
+  placeId: string
+  badge: string
+  distanceMi: number
+  /** Set where the badge is attributed to someone — the 28px face beside it. */
+  avatar?: string
+  /**
+   * Overrides the place's own photo. The card art is art-directed in Figma,
+   * whereas `thumb` is whatever Places hands back for the same listing.
+   */
+  image?: string
+}
+
+/**
+ * The full-width card at the top of the rail. It leads with the farm, which is
+ * the one place that starts outside the trip — adding it from here is what puts
+ * it on the map.
+ */
+export const CURATED_HERO: CuratedCard = {
+  placeId: KANGAROO.id,
+  badge: '🔥 Group Match',
+  distanceMi: 1.5,
+  image: '/assets/kangaroo.png',
+}
+
+/** The cards that scroll horizontally beneath the hero. */
+export const CURATED_RAIL: CuratedCard[] = [
+  {
+    placeId: 'kona-kitchen',
+    badge: '💎 Discovered by 37 people',
+    distanceMi: 0.8,
+    avatar: '/assets/cindy.png',
+  },
+  { placeId: 'kone-bar-grill', badge: '🌱 Vegetarian-Friendly', distanceMi: 1.5 },
+  { placeId: 'diablo-lake-hike', badge: '✅ Must Do', distanceMi: 1.5 },
 ]
 
-/** Creators who have never been on this jam — public itineraries that overlap it. */
-export const FROM_CREATORS: ListItem[] = [
-  { id: 'creator-1', name: 'Cascade Loop in 48 hours', rating: 4.9, reviews: 1204, photo: '/assets/itin-silver-stream.png', avatar: '/assets/topbar-av-1.jpg', byline: 'Nina Okafor', handle: '@ninaroams' },
-  { id: 'creator-2', name: 'Roadside oddities of WA-20', rating: 4.7, reviews: 863, photo: '/assets/thumb-kangaroo.jpg', avatar: '/assets/topbar-av-3.jpg', byline: 'Sam Ferreira', handle: '@detourdiary' },
-  { id: 'creator-3', name: 'Every diner between Seattle & Baker', rating: 4.8, reviews: 2417, photo: '/assets/photo-kayak-lake.png', avatar: '/assets/topbar-av-4.jpg', byline: 'Priya Raman', handle: '@lastexitfood' },
-]
+

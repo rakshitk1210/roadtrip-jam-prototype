@@ -7,3 +7,9 @@ dist
 # `.env` is committed on purpose (public Mapbox token). `.env.local` stays out
 # so anyone can override it with their own token without touching the repo.
 .env.local
+
+# Scratch folder for full-size source art and font downloads. What the app
+# actually serves is committed under `public/assets`, already sized for the web.
+# Anchored to the root: unanchored, a case-insensitive checkout reads it as
+# `assets/` too and silently drops everything the app serves.
+/Assets/

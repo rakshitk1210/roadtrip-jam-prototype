@@ -100,18 +100,25 @@
   color: var(--ink-muted);
 }
 
-.section-note {
-  margin: -6px 0 0;
-  font-size: 12px;
-  letter-spacing: -0.2px;
-  color: var(--ink-secondary);
-}
-
 .rating {
   display: flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
   color: var(--ink-secondary);
+}
+
+/* Rating sits beside a fixed-width action, so it truncates rather than
+   sliding underneath it. */
+.itin-text,
+.list-text {
+  overflow: hidden;
+}
+
+.itin-text .rating,
+.list-text .rating {
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .rating-lg {
@@ -130,7 +137,7 @@
 
 .rating-sm .rating-value {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .rating-sm .rating-count {
@@ -339,29 +346,74 @@
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  /* The faked iOS status bar used to supply this offset. `env()` keeps the
-     title row clear of the notch if this is ever added to a home screen. */
-  padding-top: max(16px, env(safe-area-inset-top));
+  align-items: center;
+  gap: 4px;
   padding-bottom: 16px;
-  background: linear-gradient(180deg, #accf83 0%, rgba(172, 207, 131, 0) 100%);
-  backdrop-filter: blur(2px);
+  /* Fade lives on ::before so the blur edge can soft-mask without affecting
+     hit targets. White 50% → clear matches Figma 1792:3892. */
+  background: transparent;
   pointer-events: none;
 }
 
-.top-chrome button,
-.top-chrome .chip,
-.top-chrome .search-field {
+.top-chrome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  /* Soften the blur region’s bottom edge so Maps WebGL doesn’t show a seam. */
+  mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  pointer-events: none;
+}
+
+.top-chrome > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* The chrome itself is click-through so the map stays draggable under it. */
+.top-chrome button {
   pointer-events: auto;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 21px 16px 19px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.status-time {
+  flex: 1;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.status-levels {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 
 .title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Same 16px gutter as .search-row and .chip-row below. */
+  width: 100%;
+  /* 16px gutters → 370px content width at the 402px phone frame. */
   padding: 0 16px;
-  margin-top: 4px;
 }
 
 .title-row .title {
@@ -384,68 +436,6 @@
   object-fit: cover;
 }
 
-.search-row {
-  padding: 0 16px;
-}
-
-.search-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 16px 0 4px;
-  border-radius: 999px;
-  background: #fff;
-}
-
-.ai-orb {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4285f4 0%, #9b72cb 50%, #d96570 100%);
-}
-
-.ai-orb img {
-  filter: brightness(0) invert(1);
-}
-
-.search-placeholder {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 16px;
-  letter-spacing: -0.48px;
-  color: var(--ink-muted);
-}
-
-.chip-row {
-  display: flex;
-  gap: 8px;
-  padding: 0 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.chip-row::-webkit-scrollbar {
-  display: none;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  padding: 8px 12px 8px 10px;
-  border-radius: 999px;
-  background: #fff;
-  font-size: 14px;
-  letter-spacing: -0.42px;
-  backdrop-filter: blur(2.5px);
-}
-
 /* ============================ Bottom sheet ============================ */
 
 .sheet {
@@ -456,9 +446,9 @@
   z-index: 30;
   display: flex;
   flex-direction: column;
-  border-radius: 28px 28px 0 0;
-  background: rgba(248, 250, 244, 0.94);
-  backdrop-filter: blur(12px);
+  border-radius: 32px 32px 0 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(14px);
   box-shadow: var(--shadow-sheet);
   will-change: transform;
 }
@@ -469,7 +459,7 @@
 
 .sheet-drag-zone {
   flex: none;
-  padding: 0 16px 14px;
+  padding: 0 16px;
   touch-action: none;
   cursor: grab;
 }
@@ -478,11 +468,13 @@
   cursor: grabbing;
 }
 
+/* 20px overall, matching the handle frame in the Figma Discover sheet. The
+   header's own top padding then makes 40px from the sheet edge to the title. */
 .sheet-handle {
   display: block;
   width: 36px;
   height: 4px;
-  margin: 16px auto 14px;
+  margin: 8px auto;
   border-radius: 999px;
   background: var(--drag-handle);
 }
@@ -493,44 +485,29 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 0 16px 28px;
+  padding: 0 16px;
+}
+
+/* Padding on a flex item that also scrolls is ignored for scroll height, so
+   the last row sat under the floating tab pill. A trailing block is content,
+   and is what actually lets either tab scroll clear of it. */
+.sheet-body::after {
+  content: '';
+  display: block;
+  height: 160px;
 }
 
 .sheet-detail .sheet-body {
   padding: 0;
 }
 
-.segmented {
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  border-radius: 999px;
-  background: var(--surface-panel);
-}
-
-.segmented button {
-  flex: 1;
-  padding: 8px;
-  border-radius: 999px;
-  font-size: 18px;
-  letter-spacing: -0.54px;
-  color: var(--ink-secondary);
-  transition: background 180ms ease, color 180ms ease;
-}
-
-.segmented button.is-active {
-  background: #fff;
-  color: var(--ink-primary);
-  box-shadow: var(--shadow-pill);
-}
-
+/* Rows sit flush and carry their own padding, so the card contributes none. */
 .sheet-card {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px 12px;
-  border-radius: 24px;
+  border-radius: 18px;
   background: #fff;
+  overflow: hidden;
 }
 
 /* ---------- Itinerary rows ---------- */
@@ -539,14 +516,14 @@
 .list-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .itin-row {
   display: flex;
   align-items: center;
-  gap: 13px;
-  height: 93px;
+  gap: 12px;
+  padding: 16px 16px 16px 12px;
+  background: var(--surface);
   animation: row-in 300ms cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
@@ -555,71 +532,138 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Rows and whole days both step aside as something is dragged past them. The
+   row also eases its background, which is what lets the just-added wash below
+   fade out instead of snapping back to white. */
+.itin-row,
+.itin-section {
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1), background 700ms ease;
+}
+
+/* A stop just added from Discover, so the list says which one is new. */
+.itin-row.is-added {
+  background: var(--yellow-highlight);
+}
+
+/* Whatever is under the finger follows it exactly, so it eases nowhere. */
+.itin-row.is-lifted,
+.itin-section.is-lifted {
+  position: relative;
+  z-index: 2;
+  transition: none;
+  box-shadow: var(--shadow-card);
+}
+
+/* A lifted row travels past the card's edges, so the clip comes off mid-drag. */
+.sheet-card.is-dragging {
+  overflow: visible;
+  user-select: none;
+}
+
+/* `touch-action` keeps a drag from scrolling the sheet body instead. */
+.drag-handle {
+  display: flex;
+  flex: none;
+  align-items: center;
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 .drag-dots {
   flex: none;
   opacity: 0.5;
 }
 
-.itin-thumb,
-.list-thumb {
-  position: relative;
-  flex: none;
-  width: 93px;
-  height: 93px;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
 .itin-photo,
 .list-photo {
-  width: 100%;
-  height: 100%;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
   object-fit: cover;
-}
-
-.itin-avatar,
-.list-avatar {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
-  width: 21px;
-  height: 21px;
-  border-radius: 999px;
-  border: 1.2px solid #fff;
-  object-fit: cover;
-}
-
-.itin-meta,
-.list-meta {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 93px;
 }
 
 .itin-text,
 .list-text {
   display: flex;
+  flex: 1;
+  min-width: 0;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .itin-name,
 .list-name {
   margin: 0;
-  font-size: 18px;
-  letter-spacing: -0.54px;
+  font-size: var(--type-body-lg-size);
+  line-height: var(--type-body-lg-line);
+  letter-spacing: 0;
   color: var(--ink-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.itin-meta .pill,
-.list-meta .pill {
-  align-self: flex-start;
+/* Leading radio in select mode. The ring and the tick are both Material glyphs,
+   so the two states share one silhouette and only the colour changes. */
+.itin-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #bdc1c6;
+  transition: color 140ms ease;
+}
+
+.itin-check.is-on {
+  color: var(--cyan-on);
+}
+
+.itin-row.is-selected {
+  background: #eef1f5;
+}
+
+/* ---------- Day grouping ---------- */
+
+/* A hairline closes a day off from whatever follows it — without one, the
+   ungrouped stops at the bottom read as part of the last day. */
+.itin-section:has(.day-heading) {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8eaed;
+}
+
+/* Nothing is drawn beside a day, so the heading is its own grab affordance. */
+.day-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 16px 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+  cursor: grab;
+  touch-action: none;
+}
+
+.day-heading:active {
+  cursor: grabbing;
+}
+
+/* Select mode has no drag: the checkmarks take the handles' place. */
+.day-heading.is-static,
+.day-heading.is-static:active {
+  cursor: default;
+}
+
+.day-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
 }
 
 /* ---------- Discover rows ---------- */
@@ -627,14 +671,78 @@
 .list-row {
   display: flex;
   align-items: center;
-  gap: 13px;
+  gap: 12px;
+  padding: 16px 16px 16px 12px;
 }
 
-/* Rows backed by a real place open the detail sheet. */
+/* A saved row stacks: the place on top, a friend's note underneath. */
+.saved-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 16px 12px;
+}
+
+.saved-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-thumb {
+  position: relative;
+  flex: none;
+  line-height: 0;
+}
+
+.list-avatar {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.2px solid #fff;
+  object-fit: cover;
+}
+
+.saved-quote {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface-dim);
+}
+
+.quote-avatar {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.quote-dot {
+  flex: none;
+  color: var(--drag-handle);
+}
+
+.quote-text {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-style: italic;
+  color: var(--ink-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rows backed by a real place open the detail sheet. Padding and radius stay
+   with the row itself now that rows are flush inside the card. */
 .is-tappable {
-  margin: 0 -8px;
-  padding: 0 8px;
-  border-radius: 14px;
   cursor: pointer;
   transition: background 140ms ease, transform 140ms ease;
 }
@@ -651,21 +759,6 @@
 .is-tappable:focus-visible {
   outline: 2px solid var(--cyan-pin);
   outline-offset: 2px;
-}
-
-.list-byline {
-  margin: 0;
-  font-size: 12px;
-  color: var(--ink-secondary);
-}
-
-.list-handle {
-  color: var(--ink-muted);
-}
-
-.list-actions {
-  display: flex;
-  gap: 8px;
 }
 
 /* ============================ Place detail ============================ */
@@ -793,4 +886,374 @@
   padding: 8px 4px;
   border-radius: 999px;
   background: var(--cyan-ai);
+}
+
+/* ============================ Redesigned sheet ============================ */
+
+/* Tab control floats over the sheet now, so both tabs own their header row. */
+.tab-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  transform: translateX(-50%);
+}
+
+.tab-pill button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 102px;
+  padding: 6px 8px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--ink-secondary);
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.tab-pill button.is-active {
+  background: var(--surface-dim);
+  color: var(--ink-primary);
+}
+
+/* Rides the corner of the glyph rather than the corner of the button, which is
+   a rounded pill with nowhere square to sit. The ring keeps it legible against
+   whatever the icon puts behind it. */
+.tab-badge {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--surface);
+  border-radius: 999px;
+  background: var(--green-badge);
+  animation: badge-in 200ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes badge-in {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* Header row inside each tab: title plus its one action. */
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  /* The 20px handle above plus this makes Figma's 40px from the sheet edge. */
+  padding: 20px 20px 8px;
+}
+
+.sheet-title-row h2,
+.sheet-heading {
+  margin: 0;
+  font-size: var(--type-headline-size);
+  line-height: var(--type-headline-line);
+  font-weight: var(--type-headline-weight);
+  letter-spacing: var(--type-headline-tracking);
+}
+
+.sheet-heading {
+  margin: 20px 0 12px;
+}
+
+.pill-outline {
+  border: 1px solid #d6d9dd;
+  background: #fff;
+  color: var(--ink-primary);
+}
+
+.pill-primary {
+  background: var(--cyan-on);
+  color: #fff;
+  font-size: 15px;
+  padding: 13px 28px;
+}
+
+/* Pins to the visible end of the sheet. Select mode hides the tab pill, so
+   this occupies that same strip rather than sitting under it. */
+.sheet-cta {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 0 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 36%);
+}
+
+/* Dropping stops is the one destructive action in the sheet, so it reads as one. */
+.round-btn-danger {
+  width: 46px;
+  height: 46px;
+  background: var(--surface-dim);
+  color: var(--red-destructive);
+}
+
+/* Directions affordance on a list row: 18px glyph in 12px of padding. */
+.round-btn-soft {
+  width: 42px;
+  height: 42px;
+  background: var(--cyan-soft);
+  color: var(--cyan-on);
+}
+
+/* The close in "Select places" is tighter than the standard 40px round button. */
+.sheet-title-row .round-btn-dim {
+  width: 36px;
+  height: 36px;
+}
+
+.round-btn.is-done {
+  color: var(--green-badge);
+}
+
+/* ---------- Discover: category rail ---------- */
+
+.cat-rail {
+  display: flex;
+  margin: 0 -16px;
+  padding: 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cat-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.cat {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  letter-spacing: -0.36px;
+  /* Every label is Ink/Primary in the design — the active state is a background
+     tint only, since the rail is interactive here in a way the frames don't show. */
+  color: var(--ink-primary);
+  transition: background 140ms ease;
+}
+
+.cat.is-active {
+  background: var(--surface-dim);
+}
+
+.cat-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.view-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  font-size: 14px;
+  color: var(--ink-primary);
+}
+
+/* ---------- Discover: curated cards ---------- */
+
+.curated-card {
+  position: relative;
+  height: 232px;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.curated-card.is-hero {
+  height: 300px;
+  border-radius: 24px;
+}
+
+.curated-card:active {
+  transform: scale(0.99);
+}
+
+.curated-card:focus-visible {
+  outline: 2px solid var(--cyan-pin);
+  outline-offset: 2px;
+}
+
+.curated-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The art is square and the cards are landscape, so bias the crop upward:
+     the subject sits above centre, and the lower third is under the scrim. */
+  object-position: 50% 15%;
+}
+
+.curated-badges {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.curated-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  line-height: 1.4;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.curated-badge-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #fff;
+  object-fit: cover;
+}
+
+.curated-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
+  background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+}
+
+.curated-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.curated-text {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.curated-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.is-hero .curated-name {
+  font-size: 20px;
+}
+
+.is-hero .curated-overlay {
+  padding: 16px 16px 26px;
+}
+
+/* Surface/Drag Handle is what Figma uses for the overlaid metadata. */
+.curated-card .rating-value,
+.curated-card .rating-count,
+.curated-card .rating-suffix {
+  color: var(--drag-handle);
+}
+
+.is-hero .rating-value,
+.is-hero .rating-count,
+.is-hero .rating-suffix {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.curated-add {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-primary);
+}
+
+.is-hero .curated-add {
+  width: 38px;
+  height: 38px;
+}
+
+/* Same green as the itinerary tab badge — both mean "this is on the trip". */
+.curated-add.is-done {
+  color: var(--green-badge);
+}
+
+/* The hero doubles as the rail's position indicator. */
+.curated-progress {
+  height: 4px;
+  margin-bottom: 46px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.curated-progress-fill {
+  display: block;
+  width: 53px;
+  height: 100%;
+  margin-left: 80px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+/* Bleeds right so the third card is visibly cut off, as in the design. */
+.curated-rail {
+  display: flex;
+  gap: 12px;
+  margin: 8px -16px 0 0;
+  padding-right: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.curated-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.curated-rail .curated-card {
+  flex: none;
+  width: 280px;
+}
+
+.rating-suffix {
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+/* The category tail is the first thing to go when the row runs out of room, so
+   it truncates rather than clipping mid-letter. */
+.list-text .rating-suffix {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

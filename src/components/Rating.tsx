@@ -4,11 +4,18 @@ interface Props {
   /** `lg` is the detail sheet (16px stars), `sm` is a list row (14px). */
   size?: 'sm' | 'lg'
   gem?: boolean
+  /** Trailing detail on the same line, e.g. the `1.5 mi` detour. */
+  suffix?: string
+  /**
+   * `single` is the redesigned list row: one star instead of the five-star
+   * strip, which is what leaves room for the distance.
+   */
+  stars?: 'full' | 'single'
 }
 
-export function Rating({ rating, reviews, size = 'sm', gem = false }: Props) {
+export function Rating({ rating, reviews, size = 'sm', gem = false, suffix, stars: mode = 'full' }: Props) {
   const full = Math.floor(rating)
-  const stars = Array.from({ length: 5 }, (_, i) => i < full)
+  const stars = mode === 'single' ? [true] : Array.from({ length: 5 }, (_, i) => i < full)
   const px = size === 'lg' ? 16 : 14
   const src = size === 'lg' ? ['/assets/star-full.svg', '/assets/star-empty.svg'] : ['/assets/star-sm-full.svg', '/assets/star-sm-empty.svg']
 
@@ -22,6 +29,7 @@ export function Rating({ rating, reviews, size = 'sm', gem = false }: Props) {
         ))}
       </span>
       <span className="rating-count">({reviews})</span>
+      {suffix && <span className="rating-suffix">· {suffix}</span>}
     </div>
   )
 }

@@ -8,14 +8,14 @@ import { useTrip } from '../state/tripContext'
  * the map, or any saved place from the list.
  */
 export function PlaceDetailSheet({ placeId }: { placeId: string }) {
-  const { closePlace, addStop, addToItinerary, toggleGem, stops, morning, evening, hasGem, findPlace } =
-    useTrip()
+  const { closePlace, addToItinerary, toggleGem, itinerary, hasGem, findPlace } = useTrip()
 
   const place = findPlace(placeId)
   if (!place) return null
 
-  const stopAdded = stops.includes(place.id)
-  const inItinerary = [...morning, ...evening].some((i) => i.id === place.id)
+  // One action, not two: the itinerary is the route, so adding to it is what
+  // bends the drive. Two buttons meant the list and the line could disagree.
+  const inItinerary = itinerary.some((i) => i.id === place.id)
   const gem = hasGem(place.id)
 
   return (
@@ -33,20 +33,12 @@ export function PlaceDetailSheet({ placeId }: { placeId: string }) {
 
       <div className="detail-actions">
         <button
-          className={`pill pill-strong${stopAdded ? ' is-done' : ''}`}
-          onClick={() => addStop(place.id)}
-          disabled={stopAdded}
-        >
-          <Icon name="directions" fill />
-          {stopAdded ? 'Stop added' : 'Add stop'}
-        </button>
-        <button
-          className={`pill pill-soft${inItinerary ? ' is-done' : ''}`}
+          className={`pill pill-strong${inItinerary ? ' is-done' : ''}`}
           onClick={() => addToItinerary(place.id)}
           disabled={inItinerary}
         >
-          <Icon name="add" />
-          {inItinerary ? 'In itinerary' : 'Add to itinerary'}
+          <Icon name="directions" fill />
+          {inItinerary ? 'Stop added' : 'Add stop'}
         </button>
         <button
           className={`pill pill-soft${gem ? ' is-gem' : ''}`}

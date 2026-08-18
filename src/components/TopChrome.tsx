@@ -1,13 +1,6 @@
 import { Icon } from './Icon'
 import { useTrip } from '../state/tripContext'
 
-const CHIPS = [
-  { icon: 'restaurant', label: 'Restaurants' },
-  { icon: 'local_cafe', label: 'Coffee' },
-  { icon: 'shopping_bag', label: 'Shopping' },
-  { icon: 'icecream', label: 'Desserts' },
-]
-
 /** Four overlapping faces, positioned exactly as in the Figma avatar cluster. */
 const TOPBAR_AVATARS = [
   { src: '/assets/topbar-av-1.jpg', size: 20.9, left: 2, top: 7 },
@@ -16,12 +9,24 @@ const TOPBAR_AVATARS = [
   { src: '/assets/topbar-av-4.jpg', size: 12.4, left: 24.1, top: 17.2 },
 ]
 
-/** Title row, AI search field and category chips. */
+/**
+ * Status bar + title row. Overlay fade matches Figma 1792:3892
+ * (white 50% → transparent with 2px backdrop blur).
+ */
 export function TopChrome() {
   const { backToYou } = useTrip()
 
   return (
     <div className="top-chrome">
+      <div className="status-bar">
+        <span className="status-time">9:41</span>
+        <span className="status-levels">
+          <img src="/assets/ic-cellular.svg" alt="" width={19.2} height={12.2} />
+          <img src="/assets/ic-wifi.svg" alt="" width={17.1} height={12.3} />
+          <img src="/assets/ic-battery.svg" alt="" width={27.3} height={13} />
+        </span>
+      </div>
+
       <div className="title-row">
         <button className="round-btn" onClick={backToYou} aria-label="Back">
           <Icon name="arrow_back" />
@@ -37,27 +42,6 @@ export function TopChrome() {
             />
           ))}
         </div>
-      </div>
-
-      <div className="search-row">
-        <div className="search-field">
-          <span className="ai-orb">
-            <img src="/assets/ic-google-ai.svg" alt="" width={16} height={16} />
-          </span>
-          <span className="search-placeholder">
-            <Icon name="search" />
-            Vegan restaurants
-          </span>
-        </div>
-      </div>
-
-      <div className="chip-row">
-        {CHIPS.map((c) => (
-          <span className="chip" key={c.label}>
-            <Icon name={c.icon} size={16} />
-            {c.label}
-          </span>
-        ))}
       </div>
     </div>
   )

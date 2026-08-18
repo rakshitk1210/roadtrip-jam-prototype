@@ -8,9 +8,19 @@
   background: #e8eaed;
 }
 
-/* Everything except the kangaroo sticker is scenery. */
+/* Scenery by default — markers that open a place turn this back on. */
 .mk {
   pointer-events: none;
+}
+
+/* Markers are styled elements rather than buttons, so they need the focus ring
+   a button would have given them. */
+.sticker.is-interactive:focus-visible,
+.emoji-chip.is-interactive:focus-visible,
+.emoji-poi.is-interactive:focus-visible,
+.stop-labelled.is-interactive:focus-visible {
+  outline: 2px solid var(--cyan-pin);
+  outline-offset: 3px;
 }
 
 /* ---------- Origin ---------- */
@@ -40,26 +50,45 @@
   100% { transform: scale(1.5); opacity: 0; }
 }
 
-/* ---------- Saved bookmark pins ---------- */
+/* ---------- Discover emoji ---------- */
 
-.bookmark-pin {
+/* The white disc every Discover marker sits on, at both of its sizes. */
+.emoji-chip,
+.emoji-poi {
   position: relative;
   display: grid;
   place-items: center;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow:
+    0 1.793px 3.586px rgba(60, 64, 67, 0.3),
+    0 3.586px 10.759px 3.586px rgba(60, 64, 67, 0.15);
+}
+
+.emoji-chip {
   width: 24px;
   height: 24px;
-  border-radius: 999px;
-  background: var(--cyan-pin);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  transition: transform 140ms ease;
 }
 
-.pin-glyph {
-  width: 8px;
-  height: 10px;
+/* A chip stands for a real place, so it opens the same sheet its row does. */
+.emoji-chip.is-interactive {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
-/* Gemming a saved place from the list shows up on its pin. */
-.pin-gem {
+.emoji-chip.is-interactive:active {
+  transform: scale(0.9);
+}
+
+.chip-glyph {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: -0.36px;
+}
+
+/* Gemming a saved place from the list shows up on its chip. */
+.chip-gem {
   position: absolute;
   top: -13px;
   left: 50%;
@@ -70,24 +99,42 @@
   animation: gem-pop 420ms cubic-bezier(0.2, 1.5, 0.4, 1);
 }
 
-/* ---------- Zoom-gated food POIs ---------- */
+/* ---------- Ambient POIs ---------- */
 
+/* Far out these are pinpricks: something is there, but not what. */
 .emoji-poi {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  font-size: 12px;
-  line-height: 1;
-  opacity: 0;
-  transform: scale(0.4);
-  transition: opacity 260ms ease, transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1);
+  width: 6px;
+  height: 6px;
+  overflow: hidden;
+  transition:
+    width 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    height 260ms cubic-bezier(0.2, 1.4, 0.4, 1),
+    transform 140ms ease;
 }
 
-.emoji-poi.is-visible {
+.emoji-poi > .chip-glyph {
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 180ms ease, transform 260ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* Zoom in and the dot opens into whatever it was hiding. */
+.emoji-poi.is-expanded {
+  width: 24px;
+  height: 24px;
+}
+
+/* Only once open — see AmbientPoi for why a pinprick stays untappable. */
+.emoji-poi.is-interactive {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.emoji-poi.is-interactive:active {
+  transform: scale(0.9);
+}
+
+.emoji-poi.is-expanded > .chip-glyph {
   opacity: 1;
   transform: scale(1);
 }
@@ -200,4 +247,49 @@
 .map-error p + p {
   margin-top: 6px;
   color: #5f6368;
+}
+
+/* ---------- Itinerary stops ---------- */
+
+/* One per itinerary place, tinted by its day once grouped. */
+.stop-dot {
+  display: block;
+  flex: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 140ms ease;
+}
+
+/* In Discover the stop carries its own name, since no sticker is there to. The
+   row is anchored from the left, so it shifts back by half a dot to keep the
+   dot itself on the coordinate. */
+.stop-labelled {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transform: translateX(-6.5px);
+}
+
+.stop-labelled.is-interactive {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.stop-labelled.is-interactive:active .stop-dot {
+  transform: scale(0.88);
+}
+
+.stop-label {
+  max-width: 88px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--ink-primary);
+  /* Same halo the stickers use — the basemap has no label plates to sit on. */
+  text-shadow:
+    0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff,
+    0 1px 2px rgba(255, 255, 255, 0.9);
 }

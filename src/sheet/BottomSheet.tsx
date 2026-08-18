@@ -5,8 +5,8 @@ import { SNAP_FRACTION, SNAP_ORDER as ORDER } from './snaps'
 interface Props {
   snap: Snap
   onSnapChange: (snap: Snap) => void
-  /** Rendered inside the drag zone — handle, tabs. */
-  header: ReactNode
+  /** Optional extra inside the drag zone, alongside the handle. */
+  header?: ReactNode
   children: ReactNode
   className?: string
 }
@@ -15,7 +15,7 @@ interface Props {
  * Draggable three-snap sheet. The sheet is always laid out at its tallest snap
  * and translated down to reveal less, so its content never reflows mid-drag.
  */
-export function BottomSheet({ snap, onSnapChange, header, children, className = '' }: Props) {
+export function BottomSheet({ snap, onSnapChange, header = null, children, className = '' }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const [drag, setDrag] = useState<{ startY: number; startTranslate: number; y: number; t: number } | null>(null)
   const [viewport, setViewport] = useState(() => window.innerHeight)

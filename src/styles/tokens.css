@@ -17,6 +17,11 @@
   --cyan-ai: #e2fcff;
   --cyan-pin: #14b4c6;
 
+  --red-destructive: #b3261e;
+  /* Feedback: the dot that says the trip changed, and the wash on what changed. */
+  --green-badge: #34a853;
+  --yellow-highlight: #feefc3;
+
   /* Avocado map */
   --avocado-land: #abce83;
   --avocado-water: #aee2e0;
@@ -27,9 +32,18 @@
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.1);
   --shadow-pill: 0 4px 12px rgba(0, 0, 0, 0.12);
 
-  /* Google Sans Flex is not distributable — Roboto is its closest public sibling
-     and is what Maps falls back to anyway. */
-  --font: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font: 'Google Sans Flex', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* The Figma type ramp, so the sizes live in one place rather than as literals
+     scattered through the sheet. Tracking is in px because Figma's -0.8 is a
+     percentage of the size (22px x -0.8% = -0.176px). */
+  --type-headline-size: 22px;
+  --type-headline-line: 28px;
+  --type-headline-weight: 500;
+  --type-headline-tracking: -0.176px;
+
+  --type-body-lg-size: 18px;
+  --type-body-lg-line: 26px;
 }
 
 * {
