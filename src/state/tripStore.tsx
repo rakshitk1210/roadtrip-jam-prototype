@@ -124,7 +124,9 @@ const move = <T,>(list: T[], from: number, to: number): T[] => {
 const SEEDED_GEMS = ['kona-kitchen']
 
 const initialState: TripState = {
-  screen: 'explore',
+  // Opens on the You tab and its Roadtrip Jam card; Explore (and the Wrapped
+  // card) is one tap away in the tab bar.
+  screen: 'you',
   tab: 'itinerary',
   snap: 'half',
   activePlaceId: null,
