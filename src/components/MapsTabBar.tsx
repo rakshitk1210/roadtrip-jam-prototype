@@ -1,6 +1,10 @@
 import { Icon } from './Icon'
 
-/** The real Explore / You / Contribute bottom bar — icons, labels, active state. */
+/**
+ * The Explore / You / Contribute bottom bar, as Google Maps draws it now: a
+ * pale bar, the current tab's icon filled and sat in a cyan pill, and a red
+ * dot on You while it has something new.
+ */
 export function MapsTabBar({
   active,
   onExplore,
@@ -18,7 +22,9 @@ export function MapsTabBar({
         disabled={!onExplore}
         onClick={onExplore}
       >
-        <Icon name="explore" size={26} fill={active === 'explore'} />
+        <span className="maps-tabbar-icon">
+          <Icon name="location_on" size={24} fill={active === 'explore'} />
+        </span>
         <span>Explore</span>
       </button>
       <button
@@ -27,11 +33,16 @@ export function MapsTabBar({
         disabled={!onYou}
         onClick={onYou}
       >
-        <Icon name="bookmark" size={26} fill={active === 'you'} />
+        <span className="maps-tabbar-icon">
+          <Icon name="bookmark" size={24} fill={active === 'you'} />
+          {active !== 'you' && <i className="maps-tabbar-dot" aria-label="New" />}
+        </span>
         <span>You</span>
       </button>
       <button disabled>
-        <Icon name="add_circle" size={26} />
+        <span className="maps-tabbar-icon">
+          <Icon name="add_circle" size={24} />
+        </span>
         <span>Contribute</span>
       </button>
     </nav>

@@ -34,6 +34,31 @@
   object-fit: cover;
 }
 
+/* The screenshot's location and directions buttons, cut from it (they sit at
+   338,487 and 338,551 in the 402x874 frame) and lifted to clear the lowered
+   sheet, 12px apart and 14px above it. */
+.explore-fab {
+  position: absolute;
+  left: 338px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: url('/assets/wrapped-map-clean.png') no-repeat;
+  background-size: 402px 874px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.explore-fab-locate {
+  top: 446px;
+  background-position: -338px -486.67px;
+}
+
+.explore-fab-directions {
+  top: 506px;
+  background-position: -338px -551px;
+}
+
 .wrapped-prompt-pin {
   position: absolute;
   top: 79px;

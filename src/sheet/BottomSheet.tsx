@@ -12,6 +12,8 @@ interface Props {
   className?: string
   /** Defaults to the trip-map snaps. Explore passes its own so the tile peeks. */
   snapFractions?: Record<Snap, number>
+  /** Holds the sheet at `snap`: it can't be dragged to another. */
+  locked?: boolean
 }
 
 /**
@@ -25,6 +27,7 @@ export function BottomSheet({
   children,
   className = '',
   snapFractions = SNAP_FRACTION,
+  locked = false,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const [drag, setDrag] = useState<{ startY: number; startTranslate: number; y: number; t: number } | null>(null)
@@ -48,6 +51,7 @@ export function BottomSheet({
     : translateFor(snap)
 
   const onPointerDown = (e: React.PointerEvent) => {
+    if (locked) return
     // Buttons living in the drag zone (the tabs) keep their taps: capturing the
     // pointer here would swallow the click that follows.
     if ((e.target as HTMLElement).closest('button')) return
@@ -94,7 +98,7 @@ export function BottomSheet({
   return (
     <div
       ref={ref}
-      className={`sheet ${className}`}
+      className={`sheet${locked ? ' is-locked' : ''} ${className}`}
       style={{
         height: fullPx,
         transform: `translateY(${translate}px)`,

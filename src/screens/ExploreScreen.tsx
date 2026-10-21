@@ -4,7 +4,7 @@ import { StatusBar } from '../components/StatusBar'
 import { PhotoPermissionScreen } from './PhotoPermissionScreen'
 import { BottomSheet } from '../sheet/BottomSheet'
 import { EXPLORE_SNAP_FRACTION } from '../sheet/snaps'
-import { useTrip, type Snap } from '../state/tripContext'
+import { useTrip } from '../state/tripContext'
 
 const PHOTOS = [
   '/assets/wrapped-photo-1.png',
@@ -15,18 +15,22 @@ const PHOTOS = [
 
 /**
  * Maps Explore landing (Figma 1668:5717). The Wrapped tile lives in this
- * sheet — drag it up from the tab bar the way the rest of Maps does.
+ * sheet, which holds at half height over the map screenshot behind it.
  */
 export function ExploreScreen() {
   const { openWrappedStart, backToYou } = useTrip()
-  const [snap, setSnap] = useState<Snap>('half')
   // "Add to your Wrapped" asks for photo access before the story starts.
   const [askingPhotos, setAskingPhotos] = useState(false)
 
   return (
     <div className="explore-screen">
-      {/* The screenshot's own status bar is painted out, so the live one reads 9:41. */}
-      <img className="explore-map" src="/assets/wrapped-map-clean.png" alt="" />
+      {/* The screenshot's own status bar is painted out, so the live one reads
+          9:41. So are its location and directions buttons, which the lowered
+          sheet would cut into — they're redrawn whole, stacked just above the
+          sheet, from their own pixels. */}
+      <img className="explore-map" src="/assets/wrapped-map-nofab.png" alt="" />
+      <span className="explore-fab explore-fab-locate" aria-hidden="true" />
+      <span className="explore-fab explore-fab-directions" aria-hidden="true" />
       <StatusBar className="status-bar-on-map" />
       <img
         className="wrapped-prompt-pin"
@@ -36,9 +40,12 @@ export function ExploreScreen() {
         height={30}
       />
 
+      {/* Locked at half: the map behind it is a screenshot with its own sheet
+          baked in, which dragging this one down would uncover. */}
       <BottomSheet
-        snap={snap}
-        onSnapChange={setSnap}
+        snap="half"
+        onSnapChange={() => {}}
+        locked
         className="sheet-explore"
         snapFractions={EXPLORE_SNAP_FRACTION}
         header={

@@ -310,6 +310,8 @@
 
 /* ============================ Trip screen chrome ============================ */
 
+/* Google Maps' current bottom bar: a pale 90px bar, three equal tabs, the
+   current one's icon in a cyan pill. */
 .maps-tabbar {
   position: absolute;
   left: 0;
@@ -318,33 +320,56 @@
   z-index: 40;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-  background: #fff;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  align-items: start;
+  height: 90px;
+  padding-top: 4px;
+  background: var(--surface-nav);
 }
 
 .maps-tabbar button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 6px 0 4px;
-  font-size: 11px;
+  gap: 4px;
+  padding: 0;
+  font-size: 12px;
   font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.1px;
   color: var(--ink-secondary);
 }
 
 .maps-tabbar button.is-active {
-  color: var(--route-blue);
+  color: var(--ink-primary);
 }
 
 .maps-tabbar button:disabled {
   pointer-events: none;
 }
 
-/* The tab you're on has nowhere to go but still reads as current, not inert. */
-.maps-tabbar button:disabled:not(.is-active) {
-  opacity: 0.4;
+.maps-tabbar-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 32px;
+  border-radius: 999px;
+}
+
+.maps-tabbar button.is-active .maps-tabbar-icon {
+  background: var(--cyan-soft);
+  color: var(--cyan-on);
+}
+
+/* Something new under You. */
+.maps-tabbar-dot {
+  position: absolute;
+  top: 2px;
+  left: 39px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ea4335;
 }
 
 .trip-screen {
@@ -510,6 +535,14 @@
 
 .sheet-drag-zone:active {
   cursor: grabbing;
+}
+
+/* A sheet held in place doesn't invite a drag, and a drag across it doesn't
+   select its header instead. */
+.sheet.is-locked .sheet-drag-zone {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* 20px overall, matching the handle frame in the Figma Discover sheet. The
