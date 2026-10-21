@@ -1,115 +1,114 @@
-# Roadtrip Jam — Seattle → North Cascades
+# Road Trip Wrapped
 
-A mobile-web prototype of the **Roadtrip Jam** flow from the Figma file
-[Playground / section 1436:13995](https://www.figma.com/design/SkeL1hPeH14hgjr1h4akzz/Playground?node-id=1436-13995),
-built on a live Mapbox map styled to the avocado palette.
+A *Wrapped*-style recap of a road trip, prototyped as part of **Roadtrip Jam** —
+a Google Maps concept for planning road trips with friends. After the trip,
+Wrapped plays it back as a story: the stats, the stops, and the photos you
+choose, ending in a shareable souvenir map of the route.
+
+This is a standalone, mobile-web prototype of the Wrapped flow. It grew out of
+the [main Roadtrip Jam prototype](https://github.com/rakshitk1210/roadtrip-jam-prototype)
+(its trip map is still inside, under the You tab) but doesn't need to stay in
+sync with it.
+
+**Live demo:** _add your Vercel URL here_
+
+Designs: [Figma — Playground](https://www.figma.com/design/SkeL1hPeH14hgjr1h4akzz/Playground)
+
+## Run it locally
 
 ```bash
-npm install && npm run dev
+npm install
+npm run dev
 ```
 
-Then open http://localhost:5173. It fills the screen on a phone and renders as a
-402×872 device on a desktop viewport.
+Then open the address it prints (http://localhost:5173 by default).
+
+The prototype is always laid out as a **402×874 iPhone 17** screen, scaled down
+to fit smaller windows — it looks the same on a laptop as on a phone.
+
+### Google Maps key (optional)
+
+Only the live trip map (You → *Seattle to North Cascades*) needs one; the whole
+Wrapped flow runs without it. Create `.env.local` in the project root:
+
+```
+VITE_GOOGLE_MAPS_KEY=your-key
+```
+
+The key needs **Maps JavaScript API**, **Places API (New)** and **Routes API**
+enabled. `.env.local` is gitignored — never commit the key.
 
 ## The flow
 
-1. **You tab** — the *Seattle to North Cascades* Roadtrip Jam card. Tap it.
-2. **Trip map** — the route drawn Seattle → North Cascades, saved bookmark pins,
-   and place stickers. The bottom sheet opens on **Itinerary**; drag its handle
-   between three snaps. The camera re-pads as the sheet moves, so the jam stays
-   centred in whatever strip of map is still visible.
-3. **Zoom past 11.5** — 🍕 🍔 🌮 ☕ 🍦 🍩 fade in as circular chips.
-4. **Tap the Outback Kangaroo Farm sticker** — the map flies in and the detail
-   sheet takes over.
-5. **Two actions** — *Add stop* puts the place in the itinerary, which is what
-   re-draws the route through it, and *Mark as Gem* drops a violet diamond on the
-   map and beside the rating. Gem toggles off on a second tap.
-6. **Group the stops into days** — *Select* in the itinerary header checks rows
-   off, then *Group to a day* files them under a `Day n` heading and paints that
-   day's stretch of the route in its own colour. Rows drag by their handle, days
-   drag by their heading, and both renumber as they land; the bin drops whatever
-   is selected.
-7. **Close** — state persists. **Discover** holds the *Saved list* and
-   *Curated for your group*, over a category rail.
+1. **Explore** — the Maps home screen. Tap **Add to your Wrapped** on the card.
+2. **Permissions** — *Personalize with Google Photos*, then the phone's own
+   photo-access prompt. Allowing access starts the story; *Not now* or
+   *Don't Allow* slides it away.
+3. **The story** — *Hi, Rakshit*, then a frame per stat (distance, hours, miles,
+   longest leg, unplanned stops). Tap the **right half** of the screen to move
+   on, the **left half** to go back.
+4. **Put your trip on the map** — the invite frame, over a blank dark-mode map.
+5. **Choose your photos** — pick up to 10 from the trip's camera roll; each one
+   lands on the map as you choose it.
+6. **Here's where your photos landed** — a preview laid out exactly as the
+   souvenir will be: each photo in its stop's spot beside the route. Tap **+**
+   on a photo to attach a memory (an inside joke, what happened there).
+7. **Choose a background** — the same map with a photo tray below; drag the
+   tray's top bar up to see every photo.
+8. **The souvenir** — the finished, shareable map: the route, every stop, and
+   the trip's numbers.
+9. **Back in the You tab** — your Wrapped photos appear as a grid. Tap one for
+   its scrapbook page (date, place, the photo, and its memory if it has one);
+   tap the sides to page through the rest.
 
-### Every place opens the same sheet
+**Shortcut:** press **P** anywhere to jump straight to *Put your trip on the map*.
 
-Tapping a **Saved** row (Mountain View Café, Diablo lake hike…) or an
-**Itinerary** row opens the same detail sheet the Kangaroo Farm uses — its own
-hours, photos, "Know before you go", and the same add-stop / add-to-itinerary /
-mark-as-gem actions. The map flies to that place, and gemming it from the list
-shows the diamond on its bookmark pin.
+## What's faked
 
-The row's own bookmark and `+ Itinerary` buttons still act on their own — they
-swallow the row tap rather than opening the sheet.
+- **The background choice is Wizard-of-Oz.** Whichever photo you pick, the
+  souvenir uses the group shot at Diablo Lake.
+- **Explore and You are screenshots** of Google Maps with live pieces on top —
+  the sheet, the nav bar, the status bar. The sheet on Explore is locked so the
+  screenshot's own sheet never shows.
+- **Positions are hand-placed from Figma**, not computed from GPS: the route
+  drawing, the stops and the photo spots all match the souvenir design.
+- **Nothing is saved.** Picks, memories and the background choice reset on
+  reload.
+- The status bar reads **9:41** everywhere.
 
-Friends' and creators' cards are *itineraries*, not places, so they stay
-non-tappable: "mark this trip as a gem" isn't a thing yet.
-
-On the map, the Kangaroo Farm sticker is the only tappable marker — the rest is
-scenery (`pointer-events: none`), as originally specced. The saved pins do react
-to gem state even though you can't tap them.
-
-## Layout
+## Where things live
 
 ```
-src/
-  map/avocadoStyle.ts   Google Maps style array ported to the Mapbox style spec
-  map/MapCanvas.tsx     map init, route layers, sheet-aware camera
-  map/MapMarkers.tsx    stickers / pins / emoji POIs as React portals into Markers
-  sheet/                three-snap drag sheet + Itinerary, On Your Route, detail
-  screens/              YouScreen, TripMapScreen
-  state/                tripContext.ts (context + hook), tripStore.tsx (provider)
-  data/places.ts        Place records, saved list, trip recommendations
-  data/directions.ts    live Directions lookup + driving-order sort for stops
-  data/routes.json      cached Mapbox Directions geometry (direct + with stop)
-  styles/               tokens.css, map.css, ui.css
-public/assets/          PNG/JPG/SVG exported from the Figma file
+src/screens/
+  ExploreScreen.tsx            Maps home + the Wrapped card
+  PhotoPermissionScreen.tsx    Google Photos permission + iOS prompt
+  WrappedFlow.tsx              the story's running order
+  WrappedStartScreen.tsx       "Hi, Rakshit"
+  WrappedFrameScreen.tsx       stat frames + the invite frame
+  PhotoPickerScreen.tsx        choose your photos
+  WrappedPreviewScreen.tsx     where your photos landed (+ memories)
+  PhotoCommentScreen.tsx       writing a memory
+  WrappedBackgroundScreen.tsx  choose a background
+  TripDiorama.tsx              the route-and-photos map both screens share
+  SouvenirMapScreen.tsx        the final souvenir
+  YouScreen.tsx                You tab + Wrapped photo grid
+  WrappedPhotoDetailScreen.tsx scrapbook page for one photo
+src/data/
+  wrappedFrames.ts             story frame copy and art
+  curationPhotos.ts            the camera roll, its places, the souvenir photo
+  souvenirMap.ts               souvenir stops, labels and stats
+  wrappedRoute.ts              photo spots on the preview map
+src/state/                     app state (tripContext.ts, tripStore.tsx)
+src/styles/                    one stylesheet per area (wrapped, photoPicker,
+                               wrappedPreview, souvenirMap, scrapbook, …)
+public/assets/                 images exported from Figma
 ```
 
-## Notes on fidelity
+## Deploying
 
-- **The avocado style.** The supplied style array is Google Maps syntax, so it's
-  re-authored against `mapbox://mapbox.mapbox-streets-v8` in
-  [`src/map/avocadoStyle.ts`](src/map/avocadoStyle.ts): land `#ABCE83`, water
-  `#AEE2E0`, highways `#EBF4A4`. Its first rule turns **all labels off**, so the
-  style declares no symbol layers at all — every word on the map comes from our
-  own HTML markers. The array also switches arterial and local roads off; those
-  classes are held back to z≥11 and z≥12 instead of cut, because the comps show
-  a pale road mesh once you zoom in on the farm.
-- **Icons** are the real Material Symbols Rounded webfont, not traced SVG. The
-  Figma components carry Material's own keyword lists (`chevron_right`,
-  `local_cafe`, `drag_indicator`), so the font is the same artwork at the right
-  optical size and inherits `currentColor`.
-- **Type** is Google Sans Flex, the same face the Figma file uses, served from
-  Google Fonts as a variable font so one file covers every weight. Roboto stays
-  on as the fallback.
-- **Coordinates are real** — Outback Kangaroo Farm sits at its actual Arlington,
-  WA location, which is why the route runs I-5 north before turning east on
-  SR-20. The Figma composition places the sticker a little further north.
-- **The route** is cached Mapbox Directions geometry in
-  [`src/data/routes.json`](src/data/routes.json) (simplified to ~160 points), so
-  the map never renders empty because a network call failed. Adding a stop other
-  than the farm asks Directions live, sorting the stops into driving order
-  first, and falls back to the cached line if that call fails.
-- **The photo pool is thin.** The Figma yields only three visually distinct
-  landscape shots, so saved places share them in rotating permutations — no
-  collage repeats an image within itself, but sets recur across places. Real
-  photography drops straight into `photos` / `thumb` in
-  [`src/data/places.ts`](src/data/places.ts).
-
-## Token
-
-`VITE_MAPBOX_TOKEN` lives in a committed `.env`, so the repo runs on clone with
-no setup. That is deliberate: `pk.` tokens are Mapbox's *public* scope, meant to
-be embedded in client-side code, and it ships inside the JS bundle either way.
-
-**Before making this repo public**, restrict the token by URL in the Mapbox
-account (Account → Tokens → the token → URL restrictions). An unrestricted
-public token that ends up on a public repo will get scraped and billed to you.
-
-To use your own token instead, drop it in `.env.local` — that file is gitignored
-and takes precedence over `.env`.
-
-The 2 MB bundle is almost entirely `mapbox-gl`; fine for a prototype, worth
-code-splitting if this ever ships.
+It's a static Vite app — on Vercel, import the repo and keep the detected
+settings (`npm run build`, output `dist`). Add `VITE_GOOGLE_MAPS_KEY` under
+**Settings → Environment Variables** if you want the trip map to work, and in
+Google Cloud restrict the key to your site's address (*Websites:*
+`your-project.vercel.app/*`) — it's visible in the page, so an unrestricted key
+can be used by anyone.
