@@ -1,0 +1,495 @@
+/* Road Trip Wrapped — curating the map: Figma 2002:1067 at rest, 2002:1217 once
+   photos have been chosen. Shares the story's easing and slide from wrapped.css. */
+
+:root {
+  /* Points and badges arrive with a little overshoot; everything else on this
+     screen takes the story's own ease. */
+  --picker-pop: cubic-bezier(0.34, 1.42, 0.64, 1);
+  --picker-chosen: #cf32f4;
+}
+
+.photo-picker {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #131314;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.photo-picker.is-in {
+  opacity: 1;
+}
+
+/* ================================== The map ================================== */
+
+.picker-map {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 100%;
+  height: 762px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Figma 2002:1069 crops a taller shot of the map, hanging it above the frame. */
+.picker-map img {
+  position: absolute;
+  left: 0;
+  top: -113.8px;
+  width: 100%;
+  height: 875.8px;
+  max-width: none;
+  object-fit: cover;
+}
+
+.picker-sky {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.picker-sky img {
+  position: absolute;
+  max-width: none;
+}
+
+/* Each glow is exported with the 100px its blur needs on every side, so the
+   artwork sits that far out from the box the design gives it. */
+.picker-glow-a {
+  left: 21px;
+  top: -176px;
+  width: 513px;
+  height: 310px;
+}
+
+.picker-glow-b {
+  left: 242px;
+  top: -139px;
+  width: 370px;
+  height: 294px;
+}
+
+/* Laid over the whole top of the frame rather than tucked behind the strip. */
+.picker-glow-top {
+  position: absolute;
+  left: -119px;
+  top: -121px;
+  z-index: 7;
+  width: 555px;
+  height: 238px;
+  max-width: none;
+  pointer-events: none;
+}
+
+.picker-marks {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.picker-pin {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  opacity: 0;
+  transform: scale(0.2);
+  transition:
+    opacity 320ms var(--wrapped-ease),
+    transform 420ms var(--picker-pop),
+    border-color 320ms ease,
+    box-shadow 420ms ease;
+}
+
+/* The map already knows the trip stopped here, so these are drawn from the start. */
+.picker-pin.is-resting {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* A chosen photo puts its point on the map, and the map blooms around it. */
+.picker-pin.is-lit {
+  opacity: 1;
+  transform: scale(1);
+  border-color: var(--picker-chosen);
+  box-shadow: 0 0 14px 5px rgba(207, 50, 244, 0.4);
+}
+
+.picker-cluster {
+  position: absolute;
+  left: 148px;
+  top: 216px;
+}
+
+.picker-cluster-tail {
+  position: absolute;
+  left: 188.5px;
+  top: 308.5px;
+}
+
+/* ================================ Top of frame ================================ */
+
+.picker-status-blend {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 117px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.27) 39.583%, rgba(102, 102, 102, 0) 100%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  pointer-events: none;
+}
+
+/* The blend above carries the strip's darkening, so the bar itself draws none. */
+.photo-picker .status-bar-on-dark {
+  z-index: 3;
+  background: none;
+}
+
+.photo-picker .wrapped-story {
+  z-index: 3;
+}
+
+.picker-head {
+  position: relative;
+  z-index: 3;
+  margin: 10px 28px 0;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.picker-head strong {
+  font-weight: 600;
+}
+
+.picker-head span {
+  font-weight: 300;
+}
+
+/* The running tally, sat under the instruction it answers. Glass so it holds its
+   own over both the map and the bloom above it, with the count in the magenta the
+   badges number the tiles in. */
+.wrapped-glass.picker-chip {
+  position: relative;
+  z-index: 3;
+  gap: 5px;
+  width: auto;
+  height: 30px;
+  margin: 13px 0 0 28px;
+  padding: 0 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+}
+
+.wrapped-glass.picker-chip strong {
+  font-weight: 600;
+  color: #f0a4ff;
+  /* Remounted on every change, so the new count drops in the way a badge's does. */
+  animation: picker-badge-tick 320ms var(--wrapped-ease) both;
+}
+
+/* It follows the line it counts for. */
+.photo-picker.is-in .picker-chip {
+  animation-delay: 460ms;
+}
+
+/* ================================== The roll ================================== */
+
+.picker-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 435px;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  border-radius: 28px 28px 0 0;
+  background: #131314;
+  transform: translateY(100%);
+  transition: transform var(--wrapped-slide) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.photo-picker.is-in .picker-sheet {
+  transform: translateY(0);
+}
+
+.picker-grabber {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 28px;
+  height: 4px;
+  margin-left: -14px;
+  border-radius: 50px;
+  background: #8c918f;
+}
+
+.picker-sheet-head {
+  position: relative;
+  flex: none;
+  height: 63px;
+  border-bottom: 1px solid #424746;
+}
+
+.picker-sheet-head p {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 25px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.36px;
+  text-align: center;
+}
+
+.picker-sheet-head img {
+  position: absolute;
+  right: 24px;
+  top: 30px;
+}
+
+.picker-roll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.picker-roll::-webkit-scrollbar {
+  display: none;
+}
+
+.picker-stamp {
+  margin: 16px 0 15px 14px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  color: #e2e3e3;
+}
+
+/* Three across, edge to edge: 132px tiles with 3px between them at 402px wide. */
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.picker-tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  /* What the design leaves behind the chosen photo: #393b3e under a black 20%
+     wash. Nothing shows it until a photo pulls back off the tile's edges. */
+  background: #2e2f32;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* The roll lands a tile at a time, once the sheet is up. */
+.photo-picker.is-in .picker-tile {
+  animation: picker-tile-in 520ms var(--wrapped-ease) both;
+  animation-delay: calc(420ms + var(--tile-step) * 45ms);
+}
+
+@keyframes picker-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.picker-tile-photo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  transition:
+    transform 400ms var(--wrapped-ease),
+    border-radius 400ms var(--wrapped-ease),
+    box-shadow 400ms var(--wrapped-ease);
+}
+
+.picker-tile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Chosen, the photo pulls back into its tile as a rounded print with a hairline
+   rim — Figma 2002:1265 draws it 109 square inside the 132 cell. The radius and
+   the rim are set against that scale so they land at the 16px and 0.5px it asks
+   for once the tile has shrunk. */
+.picker-tile.is-picked .picker-tile-photo {
+  transform: scale(0.8258);
+  border-radius: 19.4px;
+  box-shadow: 0 0 0 0.6px rgba(255, 255, 255, 0.8);
+}
+
+.picker-badge {
+  position: absolute;
+  left: 7px;
+  top: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1.6px solid #fff;
+  border-radius: 100px;
+  background: var(--picker-chosen);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.2);
+  transition:
+    opacity 200ms var(--wrapped-ease),
+    transform 340ms var(--picker-pop);
+  pointer-events: none;
+}
+
+.picker-tile.is-picked .picker-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Renumbering remounts this, so the new number drops in rather than swapping. */
+.picker-badge i {
+  font-style: normal;
+  animation: picker-badge-tick 320ms var(--wrapped-ease) both;
+}
+
+@keyframes picker-badge-tick {
+  from {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================== Footer ================================== */
+
+.picker-wash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 657px;
+  z-index: 5;
+  height: 217px;
+  background: linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(0, 0, 0, 0.4) 64.423%);
+  pointer-events: none;
+}
+
+.wrapped-foot.picker-foot {
+  z-index: 6;
+  left: 28px;
+  bottom: 40px;
+}
+
+/* The story's own arrow, on the footer's line the way the frames set it — but
+   this one has to be earned, so it eases in the moment the map has something on
+   it and withdraws the moment it doesn't. */
+.wrapped-next.picker-next {
+  z-index: 6;
+  bottom: 31px;
+  opacity: 0;
+  transform: translateY(12px) scale(0.7);
+  transition:
+    opacity 240ms var(--wrapped-ease),
+    transform 380ms var(--picker-pop);
+  pointer-events: none;
+}
+
+.wrapped-next.picker-next.is-ready {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* ============================== Skip to the end ============================== */
+
+.photo-picker.is-settled {
+  opacity: 1;
+  transition: none;
+}
+
+.photo-picker.is-settled .picker-sheet {
+  transform: none;
+  transition: none;
+}
+
+.photo-picker.is-settled .picker-reveal,
+.photo-picker.is-settled .picker-tile {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* ================================== Reveals ================================== */
+
+.picker-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+/* Nothing here waits on a scrim, so the copy opens on the same beat a light
+   story frame does. */
+.photo-picker.is-in .picker-reveal {
+  animation: wrapped-reveal var(--wrapped-reveal) var(--wrapped-ease) 300ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-picker,
+  .photo-picker.is-in {
+    opacity: 1;
+    transition: none;
+  }
+
+  .picker-sheet,
+  .photo-picker.is-in .picker-sheet {
+    transform: none;
+    transition: none;
+  }
+
+  .picker-reveal,
+  .picker-tile,
+  .picker-badge i,
+  .wrapped-glass.picker-chip strong {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .picker-tile-photo,
+  .picker-badge,
+  .picker-pin,
+  .wrapped-next.picker-next {
+    transition: none;
+  }
+}

@@ -1,0 +1,1106 @@
+/* Road Trip Wrapped — Figma 1668:5717 (prompt) and 1754:558 (start). */
+
+:root {
+  --wrapped-slide: 520ms;
+  /* One line's unveil. Delays in wrappedTimeline.ts stagger them. */
+  --wrapped-reveal: 1200ms;
+  /* The scrim's hold and dissolve. The copy's first beat waits these out — keep
+     them in sync with DARKEN_* in wrappedTimeline.ts. */
+  --wrapped-darken-hold: 200ms;
+  --wrapped-darken: 500ms;
+  --wrapped-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --wrapped-gradient: linear-gradient(
+    152.71deg,
+    rgb(54, 99, 203) 8.3%,
+    rgb(123, 76, 209) 53%,
+    rgb(168, 60, 143) 97.7%
+  );
+}
+
+/* ============================ Prompt (starting screen) ============================ */
+
+.explore-screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #dde2f2;
+}
+
+.explore-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wrapped-prompt-pin {
+  position: absolute;
+  top: 79px;
+  right: 21px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 0.7px solid #95c5f3;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sheet-explore {
+  z-index: 30;
+  background: #fff;
+  backdrop-filter: none;
+  border-radius: 28px 28px 0 0;
+}
+
+.sheet-explore .sheet-drag-zone {
+  padding: 0 20px 8px;
+}
+
+.sheet-explore .sheet-handle {
+  width: 40px;
+  margin: 8px auto 8px;
+  background: #c7c7c7;
+}
+
+/* Nothing here scrolls, and a scroll container would clip the card's glow into a
+   hard line right under the header. */
+.sheet-explore .sheet-body {
+  padding: 0 20px;
+  overflow: visible;
+}
+
+.sheet-explore .sheet-body::after {
+  content: none;
+  height: 0;
+}
+
+.wrapped-prompt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.wrapped-prompt-head h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 26px;
+  letter-spacing: 0.1px;
+  color: #1f1f1f;
+}
+
+.wrapped-prompt-weather {
+  flex: none;
+  width: 64px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.wrapped-prompt-card {
+  position: relative;
+  margin: 10px 0;
+}
+
+.wrapped-prompt-card-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 22px;
+  background: var(--wrapped-gradient);
+  opacity: 0.55;
+  filter: blur(7px);
+}
+
+.wrapped-prompt-card-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: var(--wrapped-gradient);
+}
+
+.wrapped-prompt-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.wrapped-prompt-copy img {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
+.wrapped-prompt-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+  letter-spacing: -0.1px;
+  color: #fff;
+}
+
+.wrapped-prompt-sub {
+  margin: 2px 0 0;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 14px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.wrapped-prompt-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wrapped-prompt-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 100px;
+  background: #eff5f6;
+  box-shadow: 0.2px 0.2px 4px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f1f1f;
+  white-space: nowrap;
+}
+
+.wrapped-prompt-cta img {
+  width: 15px;
+  height: 15px;
+}
+
+/* Rises past the row so the cluster sits beside the copy as well as the button,
+   which keeps the button tucked under the text instead of being pushed down by
+   the cluster's full height. */
+.wrapped-prompt-photos {
+  position: relative;
+  flex: none;
+  width: 78px;
+  height: 76px;
+  margin-top: -32px;
+}
+
+.wrapped-prompt-photos img {
+  position: absolute;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 0.5px solid rgba(255, 255, 255, 0.5);
+}
+
+.wrapped-prompt-photos img:nth-child(1) {
+  width: 50px;
+  height: 50px;
+  left: 0;
+  top: 0;
+}
+
+.wrapped-prompt-photos img:nth-child(2) {
+  width: 27px;
+  height: 27px;
+  left: 51px;
+  top: 5px;
+}
+
+.wrapped-prompt-photos img:nth-child(3) {
+  width: 31px;
+  height: 31px;
+  left: 47px;
+  top: 35px;
+}
+
+.wrapped-prompt-photos img:nth-child(4) {
+  width: 24px;
+  height: 24px;
+  left: 21px;
+  top: 52px;
+}
+
+/* ============================ Start (second screen) ============================ */
+
+.wrapped-start {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  overflow: hidden;
+  color: #fff;
+  background: #2a3d8f;
+  transform: translateY(100%);
+  transition: transform var(--wrapped-slide) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wrapped-start.is-in {
+  transform: translateY(0);
+}
+
+.wrapped-start-bg-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #2a3d8f url('/assets/wrapped-start-bg.png') center / cover no-repeat;
+}
+
+/* Figma 1754:559 sits 532×944 at −42/−26; extra bleed gives the ken-burns room. */
+.wrapped-start-bg {
+  position: absolute;
+  left: -80px;
+  top: -60px;
+  width: 580px;
+  height: 1040px;
+  max-width: none;
+  object-fit: cover;
+  filter: saturate(1.45) contrast(1.06);
+  animation: wrapped-bg-drift 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Overlay rather than screen: it deepens the gradient as it drifts instead of
+   lifting the whole frame towards white. */
+.wrapped-start-dream {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(ellipse at 28% 38%, rgba(255, 150, 220, 0.3), transparent 40%),
+    radial-gradient(ellipse at 78% 72%, rgba(78, 26, 224, 0.45), transparent 48%);
+  mix-blend-mode: overlay;
+  animation: wrapped-dream-drift 16s ease-in-out infinite alternate;
+}
+
+/* Draws in the bloom the photograph carries through the middle, which is exactly
+   where the text sits — a narrower, dimmer core leaves the copy something to read
+   against and lets the drifting colour show. */
+.wrapped-start-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      70% 38% at 48% 47%,
+      rgba(24, 8, 88, 0.42) 0%,
+      rgba(24, 8, 88, 0.22) 48%,
+      rgba(24, 8, 88, 0) 80%
+    ),
+    rgba(15, 0, 183, 0.05);
+  pointer-events: none;
+}
+
+.wrapped-start-wash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 246px;
+  background: linear-gradient(180deg, rgba(176, 92, 169, 0) 0%, rgba(5, 4, 110, 0.28) 90%);
+  pointer-events: none;
+}
+
+.status-bar-on-dark {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 4.8%, rgba(102, 102, 102, 0) 100%);
+}
+
+.status-bar-on-dark img {
+  filter: brightness(0) invert(1);
+}
+
+.wrapped-story {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  margin: 8px 24px 0;
+}
+
+.wrapped-story span {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.wrapped-story span.is-done {
+  background: #fff;
+}
+
+.wrapped-story-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation-name: wrapped-story-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+/* Centred in the frame rather than stacked from the top, so the lines land as one
+   block however tall the phone is. */
+.wrapped-start-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 0 32px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.wrapped-greet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* The spark keeps a life of its own once the greeting has landed: a slow hover,
+   a squash, then a jump that turns like a coin, drifting home over seven seconds.
+   The delay comes from the component, which knows when the greeting arrives. */
+.wrapped-greet img {
+  width: 46px;
+  height: 46px;
+  transform-origin: 50% 50%;
+  /* A sine ease by default, so the hover and the descent start and stop softly. */
+  animation: wrapped-spark 7s cubic-bezier(0.37, 0, 0.63, 1) infinite both;
+}
+
+/*
+ * Four beats: a tall, slow hover; a compress that winds up; a jump that carries
+ * one uninterrupted rotateY turn; then a longer glide home. The turn is a single
+ * stretch with no waypoint inside it, so it passes edge-on at speed rather than
+ * hesitating there, and it carries all the way round to 360°: the artwork's
+ * gradient runs corner to corner, so a half turn would leave it resting mirrored.
+ * Opening and closing on the same pose keeps the loop seamless.
+ */
+@keyframes wrapped-spark {
+  0% {
+    transform: perspective(240px) translateY(0) rotateY(0deg) scaleX(1) scaleY(1);
+  }
+  /* Hover peak: a slow 18px bob with a small breath — floating, not bouncy. */
+  20% {
+    transform: perspective(240px) translateY(-18px) rotateY(0deg) scaleX(1.04) scaleY(1.04);
+  }
+  /* Back to rest before the wind-up, so the squash reads as its own beat. */
+  36% {
+    transform: perspective(240px) translateY(0) rotateY(0deg) scaleX(1) scaleY(1);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.7, 1);
+  }
+  /* Squash: dip and flatten, still facing forward. The next beat is the release. */
+  46% {
+    transform: perspective(240px) translateY(6px) rotateY(0deg) scaleX(1.14) scaleY(0.7);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* Jump + coin flip together. Ease-out leaps off the squash; 90°/270° fall in
+     the fast stretch, so the glyph does not hang edge-on. */
+  62% {
+    transform: perspective(240px) translateY(-28px) rotateY(360deg) scaleX(1.04) scaleY(1.04);
+  }
+  100% {
+    transform: perspective(240px) translateY(0) rotateY(360deg) scaleX(1) scaleY(1);
+  }
+}
+
+.wrapped-hi {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 0.16px;
+  text-shadow: 0.5px 0.5px 4px rgba(0, 0, 0, 0.1);
+}
+
+.wrapped-lede {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0.08px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.wrapped-lede strong {
+  font-weight: 600;
+}
+
+/* The question belongs with the lede above it, so it closes the container's gap. */
+.wrapped-rewind {
+  margin: -12px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: 0.09px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+/* A pane of glass: the photograph behind it is blurred and bent, with light
+   pooling along the top edge and a rim that catches it at the corners. */
+.wrapped-glass,
+.wrapped-next {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  /* The sheen the curve throws across the upper half, over the pane's own tint.
+     Both are backgrounds so the pill's radius clips them; a layer that spills past
+     the rounded ends breaks the blur underneath. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.035) 38%,
+      rgba(255, 255, 255, 0.02) 64%,
+      rgba(255, 255, 255, 0.075) 100%
+    );
+  backdrop-filter: blur(20px) saturate(155%) brightness(1.02);
+  -webkit-backdrop-filter: blur(20px) saturate(155%) brightness(1.02);
+  /* The bevel: light gathers just inside the top edge and bounces off the bottom,
+     which is what makes the pane read as thick rather than painted on. */
+  box-shadow:
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.12),
+    inset 0 0 14px rgba(255, 255, 255, 0.05);
+  color: #fff;
+  pointer-events: auto;
+}
+
+/* Glass refracts hardest at its rim, brightest where the light enters and leaves. */
+.wrapped-glass::before,
+.wrapped-next::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.3) 24%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.34) 74%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.wrapped-glass {
+  gap: 9px;
+  width: 233px;
+  height: 50px;
+  padding: 12px 18px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.wrapped-glass img {
+  width: 7.4px;
+  height: 10px;
+}
+
+/* Sits on the footer's line, opposite the logo. */
+.wrapped-next {
+  position: absolute;
+  z-index: 1;
+  right: 24px;
+  bottom: 23px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+}
+
+.wrapped-next img {
+  width: 7.4px;
+  height: 10px;
+}
+
+/* Once the photos are chosen, the arrow sits over busy photography, so its
+   glass catches a refraction in the picker's own magenta (--picker-chosen,
+   #cf32f4, the colour of a chosen photo's badge): the same bevel and blur,
+   with a tinted rim and a soft halo bleeding out around the edge. The picker's arrow only
+   takes it once it's ready; the steps after picking always are. */
+.wrapped-next.picker-next.is-ready,
+.wrapped-preview .wrapped-next {
+  box-shadow:
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.12),
+    inset 0 0 14px rgba(224, 140, 250, 0.22),
+    0 0 0 1px rgba(224, 140, 250, 0.6),
+    0 0 12px 3px rgba(207, 50, 244, 0.55),
+    0 0 28px 7px rgba(207, 50, 244, 0.25);
+}
+
+.wrapped-next.picker-next.is-ready::before,
+.wrapped-preview .wrapped-next::before {
+  background: linear-gradient(
+    150deg,
+    rgba(246, 226, 255, 0.95) 0%,
+    rgba(217, 120, 248, 0.7) 24%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(217, 120, 248, 0.7) 74%,
+    rgba(240, 212, 255, 0.9) 100%
+  );
+}
+
+.wrapped-foot {
+  position: absolute;
+  z-index: 1;
+  left: 24px;
+  bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.8;
+}
+
+.wrapped-foot img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
+.wrapped-foot p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.32px;
+  color: #fffcf7;
+}
+
+/* Each line waits its turn — delays live in wrappedTimeline.ts — then rises once
+   and stays: the sequence settles instead of looping. */
+.wrapped-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+}
+
+.wrapped-start.is-in .wrapped-reveal,
+.wrapped-frame.is-in .wrapped-reveal {
+  animation-name: wrapped-reveal;
+  animation-duration: var(--wrapped-reveal);
+  animation-timing-function: var(--wrapped-ease);
+  animation-fill-mode: both;
+}
+
+@keyframes wrapped-bg-drift {
+  0% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  35% {
+    transform: scale(1.16) translate3d(-4.5%, 3%, 0);
+  }
+  70% {
+    transform: scale(1.1) translate3d(3%, -2.5%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes wrapped-dream-drift {
+  from {
+    transform: translate3d(-4%, 3%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(5%, -4%, 0) scale(1.12);
+  }
+}
+
+@keyframes wrapped-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wrapped-dissolve {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes wrapped-story-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ======================= Story frames (photographic screens) ======================= */
+
+.wrapped-frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #10131a;
+  opacity: 0;
+  transition: opacity 420ms ease;
+  /* Frames rise brisker than the intro does; mirrors REVEAL_MS. */
+  --wrapped-reveal: 850ms;
+}
+
+.wrapped-frame.is-in {
+  opacity: 1;
+}
+
+.wrapped-frame-bg-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Each photo carries its designed crop inline, since every frame is offset and
+   oversized differently, along with any turn the design gives it. */
+.wrapped-frame-bg {
+  position: absolute;
+  max-width: none;
+  object-fit: cover;
+  animation: wrapped-frame-drift 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* The photograph opens clean and the scrim settles over it a beat later. */
+.wrapped-frame-darken {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wrapped-frame.is-in .wrapped-frame-darken {
+  animation: wrapped-dissolve var(--wrapped-darken) ease var(--wrapped-darken-hold) both;
+}
+
+.wrapped-frame-wash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 217px;
+  background: linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(0, 0, 0, 0.4) 89.9%);
+  pointer-events: none;
+}
+
+.wrapped-frame-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px 96px;
+  text-align: center;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* The Share button fills the lower half these frames leave open, so their copy
+   sits on the frame's centre line instead of above it. */
+.wrapped-frame-body.has-share {
+  padding-bottom: 0;
+}
+
+/* One beat per section. Full width so each line still wraps where it did when the
+   lines were the body's own children. */
+.wrapped-frame-section {
+  align-self: stretch;
+}
+
+.wrapped-line-title {
+  margin: 0 0 44px;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 38px;
+  letter-spacing: 0.16px;
+}
+
+.wrapped-line-lede {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 30px;
+  letter-spacing: 0.17px;
+}
+
+.wrapped-line-close {
+  margin: 2px 0 0;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: 0.17px;
+}
+
+.wrapped-line-headline,
+.wrapped-line-headlineSm {
+  margin: 0;
+  font-weight: 300;
+  color: #fffcf7;
+}
+
+.wrapped-line-headline {
+  font-size: 28px;
+  line-height: 34px;
+  letter-spacing: -0.56px;
+}
+
+.wrapped-line-headline strong {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.wrapped-line-headlineSm {
+  font-size: 26px;
+  line-height: 30px;
+  letter-spacing: -0.52px;
+}
+
+.wrapped-line-headlineSm strong {
+  font-weight: 600;
+}
+
+.wrapped-line-caption {
+  margin: 22px 0 0;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: #fffcf7;
+}
+
+.wrapped-line-caption strong {
+  font-weight: 500;
+}
+
+.wrapped-frame-share {
+  margin-top: 92px;
+  /* Figma's 4px gap sits between 22px icon bounds; the glyph inside them is
+     14.67px wide, so the drawn gap is that plus the box's own padding. */
+  gap: 8px;
+  font-weight: 500;
+  letter-spacing: -0.36px;
+}
+
+.wrapped-frame-share img {
+  width: 14.67px;
+  height: 20.17px;
+}
+
+@keyframes wrapped-frame-drift {
+  from {
+    transform: var(--frame-turn, rotate(0deg)) scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: var(--frame-turn, rotate(0deg)) scale(1.1) translate3d(-2%, 1.6%, 0);
+  }
+}
+
+/* ---------------------------- Light frames ---------------------------- */
+
+/* The invite frame is a deep blue wash rather than a photograph: no scrim to
+   dissolve, and a soft green glow catching the top edge like bounced light. */
+/* A blank dark-mode map — land, water, parks, roads, no labels — dark enough
+   that the blooms and the route read clearly over it. A soft light at the top
+   and a shade at the foot keep the copy legible. */
+.wrapped-frame.is-light {
+  background:
+    radial-gradient(120% 45% at 50% -6%, rgba(151, 234, 173, 0.28) 0%, rgba(151, 234, 173, 0) 62%),
+    linear-gradient(180deg, rgba(5, 14, 10, 0) 60%, rgba(5, 14, 10, 0.55) 100%),
+    url('/assets/invite-map-dark.svg') center / cover no-repeat,
+    #10241a;
+  color: #eaf3ff;
+}
+
+.wrapped-frame.is-light .wrapped-frame-bg {
+  display: none;
+}
+
+.wrapped-frame-grain {
+  position: absolute;
+  inset: 0;
+  background: rgba(146, 146, 146, 0.05);
+  pointer-events: none;
+}
+
+.wrapped-invite-route {
+  position: absolute;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* Title at the top, instruction at the foot — Figma 1703:6950 hangs them apart. */
+.wrapped-frame.is-light .wrapped-frame-body {
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 124px 12px 145px;
+  text-align: left;
+  text-shadow: none;
+}
+
+.wrapped-frame.is-light .wrapped-story {
+  margin: 5px 30px 0;
+}
+
+.wrapped-frame.is-light .wrapped-foot {
+  left: 28px;
+  bottom: 40px;
+}
+
+/* Figma's 37px gap is measured from the mark's 104px layout box; the artwork sits
+   inside it, so the drawn gap carries the rest of that box. */
+.wrapped-frame-mark {
+  display: flex;
+  margin-bottom: 56px;
+}
+
+/* Invite blooms sit in the frame; overflow stays visible so the turn can breathe. */
+.wrapped-invite-bloom {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  margin: 0;
+  pointer-events: none;
+}
+
+.wrapped-invite-bloom img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The mark carries the motion built into the design (Figma 1703:6973): it drops in
+   spinning, then somersaults a half turn and back while breathing down to two
+   thirds of its size. */
+.wrapped-frame.is-in .wrapped-frame-mark {
+  animation-name: wrapped-bloom-drop;
+  animation-duration: 310ms;
+  animation-timing-function: cubic-bezier(0.07, 0.97, 0.58, 1);
+}
+
+/* One somersault per pass, opening and closing at rest so the loop has no seam. */
+.wrapped-frame.is-in .wrapped-frame-mark img {
+  animation: wrapped-bloom-turn 6s linear infinite both;
+}
+
+@keyframes wrapped-bloom-drop {
+  from {
+    opacity: 0;
+    transform: translateY(116px) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Sampled off the Figma timeline, so the steps between keys carry its easing. The
+   last tenth holds at rest: a beat between somersaults. */
+@keyframes wrapped-bloom-turn {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  8.4% {
+    transform: rotate(1deg) scale(0.99);
+  }
+  15% {
+    transform: rotate(21.5deg) scale(0.967);
+  }
+  18.4% {
+    transform: rotate(42.8deg) scale(0.95);
+  }
+  23.3% {
+    transform: rotate(85.8deg) scale(0.87);
+  }
+  28.4% {
+    transform: rotate(126.6deg) scale(0.8);
+  }
+  33.3% {
+    transform: rotate(154.8deg) scale(0.75);
+  }
+  36.6% {
+    transform: rotate(166.9deg) scale(0.72);
+  }
+  40% {
+    transform: rotate(174.6deg) scale(0.7);
+  }
+  46.7% {
+    transform: rotate(180.3deg) scale(0.667);
+  }
+  50% {
+    transform: rotate(177.2deg) scale(0.68);
+  }
+  55% {
+    transform: rotate(156.3deg) scale(0.7);
+  }
+  58.3% {
+    transform: rotate(111.8deg) scale(0.73);
+  }
+  61.7% {
+    transform: rotate(64.4deg) scale(0.78);
+  }
+  66.7% {
+    transform: rotate(29.8deg) scale(0.85);
+  }
+  73.4% {
+    transform: rotate(9.2deg) scale(0.93);
+  }
+  80% {
+    transform: rotate(0.3deg) scale(0.98);
+  }
+  90%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.wrapped-line-inviteTitle {
+  width: 340px;
+  margin: 0 auto;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 40px;
+  letter-spacing: 0.2px;
+  color: #fff;
+  filter: drop-shadow(0.5px 0.5px 4px rgba(0, 0, 0, 0.1));
+}
+
+.wrapped-line-inviteBody {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 20px;
+  letter-spacing: -0.36px;
+  color: #eaf3ff;
+  text-align: center;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.wrapped-line-inviteBody strong {
+  font-weight: 600;
+}
+
+/* Unfilled ticks read as a soft haze on the deep blue; filled ticks take the copy's white. */
+.wrapped-frame.is-light .wrapped-story span {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.wrapped-frame.is-light .wrapped-story span.is-done,
+.wrapped-frame.is-light .wrapped-story-fill {
+  background: #eaf3ff;
+}
+
+.wrapped-frame.is-light .wrapped-foot p {
+  color: #eaf3ff;
+}
+
+/* ============================== Skip to the end ============================== */
+
+/* A tap anywhere jumps a screen to how it ends: every element shown, the scrim
+   fully settled. These come last so they win over the entry animations. */
+.wrapped-start.is-settled,
+.wrapped-frame.is-settled {
+  transform: none;
+  transition: none;
+  opacity: 1;
+}
+
+/* Only the reveals stop here. The intro spark's hover and the mark's somersault run
+   on the artwork inside their boxes, so they keep cycling: both are ambient rather
+   than part of the sequence. */
+.wrapped-start.is-settled .wrapped-reveal,
+.wrapped-frame.is-settled .wrapped-reveal {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+.wrapped-frame.is-settled .wrapped-frame-darken {
+  animation: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapped-start,
+  .wrapped-start.is-in {
+    transform: none;
+    transition: none;
+  }
+
+  .wrapped-frame,
+  .wrapped-frame.is-in {
+    opacity: 1;
+    transition: none;
+  }
+
+  .wrapped-start-bg,
+  .wrapped-start-dream {
+    animation: none;
+    transform: none;
+  }
+
+  /* Still held at the turn the design gives it, just not drifting. */
+  .wrapped-frame-bg {
+    animation: none;
+    transform: var(--frame-turn, none);
+  }
+
+  .wrapped-frame-darken {
+    animation: none !important;
+    opacity: 1;
+  }
+
+  .wrapped-reveal,
+  .wrapped-greet img,
+  .wrapped-frame-mark img {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .wrapped-story-fill {
+    animation: none !important;
+    transform: scaleX(1);
+  }
+}

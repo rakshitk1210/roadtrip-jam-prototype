@@ -1,0 +1,235 @@
+/* Road Trip Wrapped — the distribution preview between the picker and the
+   souvenir: the chosen photos scattered along a stylized route, each with a
+   small "+" to attach a memory. Shares the story's dark ground and glass
+   button treatment from wrapped.css. */
+
+/* The same blank dark-mode map as the invite frame — land, water, parks, roads,
+   no labels — with a shade at the top and foot so the copy stays legible. */
+.wrapped-preview {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(5, 14, 10, 0.45) 0%, rgba(5, 14, 10, 0) 22%),
+    linear-gradient(180deg, rgba(5, 14, 10, 0) 70%, rgba(5, 14, 10, 0.55) 100%),
+    url('/assets/invite-map-dark.svg') center / cover no-repeat,
+    #10241a;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.wrapped-preview.is-in {
+  opacity: 1;
+}
+
+.preview-head {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 96px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 26px;
+  letter-spacing: 0.1px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.preview-head strong {
+  font-weight: 600;
+}
+
+/* The souvenir's own map layer, at its own positions, nudged down far enough
+   to clear the heading. Click-through but for the "+" buttons. */
+.preview-diorama {
+  position: absolute;
+  left: 0;
+  top: 44px;
+  width: 402px;
+  height: 874px;
+  pointer-events: none;
+}
+
+/* Placed exactly as .souvenir-route places it on the souvenir. */
+.preview-route-line {
+  position: absolute;
+  left: 41.16px;
+  top: 201.85px;
+  width: 339.109px;
+  height: 373.3px;
+  max-width: none;
+  transform: rotate(-4.86deg);
+  transform-origin: 166.93px 185.49px;
+}
+
+/* The souvenir's car and gem stickers keep its own positions and art; they
+   only need showing, since souvenirMap.css hides them until the souvenir plays. */
+.preview-diorama .souvenir-car,
+.preview-diorama .souvenir-gem {
+  opacity: 1;
+  animation: preview-pin-in 420ms var(--picker-pop, cubic-bezier(0.34, 1.42, 0.64, 1)) both;
+}
+
+/* A print, as the souvenir pins one: a circle with a hand-drawn ring. */
+.preview-slot {
+  position: absolute;
+  z-index: 1;
+  border-radius: 999px;
+  animation: preview-pin-in 420ms var(--picker-pop, cubic-bezier(0.34, 1.42, 0.64, 1)) both;
+}
+
+/* A stop still waiting for a photo: just its ring. */
+.preview-slot:not(.is-filled) {
+  background: rgba(255, 255, 255, 0.06);
+  opacity: 0.55;
+}
+
+@keyframes preview-pin-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+.preview-slot-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.preview-slot-ring {
+  position: absolute;
+  left: calc(50% - 22px);
+  top: calc(50% - 22px);
+  width: 44px;
+  height: 44px;
+  max-width: none;
+  transform: rotate(21.52deg);
+}
+
+/* Set as the souvenir sets its labels — `top` is the label's middle. */
+.preview-label {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.24px;
+  line-height: 9.353px;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+  transform: translateY(-50%);
+}
+
+/* Centred on a print's top-right edge, above everything else on the map. */
+.preview-pin-add {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-primary);
+  box-shadow: var(--shadow-pill);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  animation: preview-add-in 420ms 120ms ease both;
+}
+
+@keyframes preview-add-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.preview-pin-add.is-commented {
+  background: var(--green-badge);
+  color: #fff;
+}
+
+/* The comment editor sits above the whole Wrapped stack (zIndex: 80 + index),
+   not just above .screen-over's usual z-index: 60. */
+.photo-comment {
+  z-index: 300;
+  /* Mounted inside the dark preview screen, so it would inherit white ink. */
+  color: var(--ink-primary);
+}
+
+.gem-badge .comment-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+/* ------------------------- Choose-a-background screen ------------------------- */
+
+/* The preview's map on the preview's ground, with the roll as a tray below. */
+.wrapped-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(5, 14, 10, 0.45) 0%, rgba(5, 14, 10, 0) 22%),
+    url('/assets/invite-map-dark.svg') center / cover no-repeat,
+    #10241a;
+}
+
+/* No heading here, so the map rises into the space the preview gives one. */
+.preview-diorama.is-raised {
+  top: -40px;
+}
+
+/* The picker's sheet; its top and drag position are set inline. */
+.bg-sheet-handle {
+  position: relative;
+  flex: none;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.bg-sheet-handle:active {
+  cursor: grabbing;
+}
+
+.wrapped-background.is-in .picker-tile {
+  animation: picker-tile-in 520ms var(--wrapped-ease) both;
+  animation-delay: calc(420ms + var(--tile-step) * 45ms);
+}
+
+.wrapped-background.is-settled .picker-tile {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* The badge carries a tick rather than a number. */
+.wrapped-background .picker-badge {
+  padding: 0;
+}
+
+/* The chosen background stays full size — a preview of the photo itself — and
+   is marked by a white rim instead of shrinking into a print as picks do. */
+.wrapped-background .picker-tile.is-picked .picker-tile-photo {
+  transform: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wrapped-background .picker-tile.is-picked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 0 0 3px #fff;
+  pointer-events: none;
+}

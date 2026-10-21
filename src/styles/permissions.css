@@ -1,0 +1,464 @@
+/* "Personalize with Google Photos" — Figma 1703:6397, and 1703:6802, the same
+   screen dimmed under the phone's photo-access prompt. Positions are the
+   design's own, on the 402x874 frame. */
+
+/* Slides up as a sheet, the way the story's intro does — and sits just under
+   that intro (z-index 70), so allowing access slides the intro up over it. */
+.permission {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink-primary);
+  transform: translateY(100%);
+  transition: transform var(--wrapped-slide) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.permission.is-in {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .permission,
+  .permission.is-in {
+    transform: none;
+    transition: none;
+  }
+}
+
+.permission-bg {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 477px;
+  height: 873px;
+  overflow: hidden;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.permission-bg img {
+  position: absolute;
+  left: -7.37%;
+  top: 0;
+  width: 103%;
+  height: 100%;
+  max-width: none;
+}
+
+/* ---------------------------------- Prints ---------------------------------- */
+
+.permission-print-turn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.permission-print {
+  position: relative;
+  flex: none;
+  width: 94.846px;
+  height: 111.205px;
+  overflow: hidden;
+  border: 6.79px solid #fff;
+  border-radius: 1.045px;
+  box-shadow:
+    -1.045px 0 4.178px rgba(0, 0, 0, 0.1),
+    2.089px 3.134px 4.178px rgba(0, 0, 0, 0.15);
+}
+
+.permission-print img {
+  position: absolute;
+  max-width: none;
+}
+
+.permission-print-left {
+  left: 37px;
+  top: 178.8px;
+  width: 121.824px;
+  height: 133.04px;
+}
+
+.permission-print-left .permission-print {
+  transform: rotate(-16deg);
+}
+
+.permission-print-right {
+  left: 237.45px;
+  top: 179.25px;
+  width: 127.546px;
+  height: 137.21px;
+}
+
+.permission-print-right .permission-print {
+  transform: rotate(20.31deg);
+}
+
+.permission-print-middle {
+  left: 133.89px;
+  top: 164px;
+  width: 125.476px;
+  height: 134.507px;
+}
+
+.permission-print-middle .permission-print {
+  width: 116.874px;
+  height: 126.614px;
+  transform: rotate(4.03deg);
+}
+
+.permission-crop-beach {
+  left: -14.99%;
+  top: -17.28%;
+  width: 129.72%;
+  height: 133.94%;
+}
+
+.permission-crop-mountain {
+  left: -2.03%;
+  top: 0.02%;
+  width: 104.14%;
+  height: 105.53%;
+}
+
+.permission-crop-road {
+  left: -5.85%;
+  top: 0;
+  width: 106.38%;
+  height: 107.8%;
+}
+
+/* ---------------------------------- Copy ---------------------------------- */
+
+.permission-body {
+  position: absolute;
+  left: 0;
+  top: 376px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 402px;
+}
+
+.permission-body h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.18px;
+  text-align: center;
+  text-shadow: 0.5px 0.5px 4px rgba(0, 0, 0, 0.1);
+}
+
+.permission-copy {
+  width: 300px;
+  margin: 0;
+  font-size: 16px;
+  line-height: 28px;
+  letter-spacing: 0.08px;
+  text-align: center;
+  color: #000;
+}
+
+.permission-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 28px;
+  letter-spacing: 0.07px;
+  white-space: nowrap;
+  color: #000;
+}
+
+.permission-continue {
+  width: 330px;
+  height: 50px;
+  padding: 12px 18px;
+  border-radius: 50px;
+  background: #196ee8;
+  font-size: 18px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.permission-continue:active {
+  transform: scale(0.98);
+}
+
+.permission-later {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: 0.08px;
+  color: #1a73e8;
+}
+
+.permission-foot {
+  position: absolute;
+  left: 28px;
+  top: 816px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.permission-foot p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: -0.32px;
+  color: #196ee8;
+}
+
+/* ------------------------------- Glows & sparks ------------------------------- */
+
+.permission-glow {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Each glow's blur spills well past its box, so the art is drawn oversize. */
+.permission-glow img {
+  position: absolute;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+}
+
+.permission-glow-bottom,
+.permission-glow-top {
+  width: 241px;
+  height: 51px;
+}
+
+.permission-glow-bottom {
+  left: 131px;
+  top: 834px;
+}
+
+.permission-glow-top {
+  left: 115px;
+  top: -23px;
+}
+
+.permission-glow-bottom img,
+.permission-glow-top img {
+  inset: -330.45% -69.93%;
+}
+
+.permission-glow-top-right {
+  left: 226px;
+  top: -40px;
+  width: 213px;
+  height: 73px;
+}
+
+.permission-glow-top-right img {
+  inset: -136.99% -46.95%;
+}
+
+.permission-glow-corner {
+  left: 364.75px;
+  top: -27px;
+  width: 97px;
+  height: 111px;
+}
+
+.permission-glow-corner img {
+  inset: -90.09% -103.09%;
+}
+
+.permission-glow-edge {
+  left: 372px;
+  top: 31px;
+  width: 42px;
+  height: 111px;
+}
+
+.permission-glow-edge img {
+  inset: -90.09% -238.1%;
+}
+
+.permission-spark {
+  position: absolute;
+  display: block;
+  max-width: none;
+  pointer-events: none;
+}
+
+.permission-spark-large {
+  inset: 9.84% 30.75% 83.63% 55.72%;
+}
+
+.permission-spark-small {
+  inset: 17.73% 77.11% 80.22% 18.66%;
+}
+
+.permission-spark-pink {
+  inset: 37.3% 47.01% 58.86% 45.02%;
+}
+
+.permission-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+
+.permission-dot-a {
+  left: 183px;
+  top: 133px;
+}
+
+.permission-dot-c {
+  left: 121px;
+  top: 323px;
+}
+
+.permission-dot-b {
+  left: 295px;
+  top: 149px;
+}
+
+/* Two stickers cut from one sheet, each a different window onto it. */
+.permission-sticker-turn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.permission-sticker {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+}
+
+.permission-sticker img {
+  position: absolute;
+  width: 444.1%;
+  height: 344.74%;
+  max-width: none;
+}
+
+.permission-sticker-a {
+  left: 250.73px;
+  top: 309.22px;
+  width: 39.74px;
+  height: 40.214px;
+}
+
+.permission-sticker-a .permission-sticker {
+  width: 30.408px;
+  height: 29.378px;
+  transform: rotate(63.98deg);
+}
+
+.permission-sticker-a img {
+  left: -12.31%;
+  top: -222.57%;
+}
+
+.permission-sticker-b {
+  left: 94.75px;
+  top: 100px;
+  width: 51.594px;
+  height: 50.394px;
+}
+
+.permission-sticker-b .permission-sticker {
+  width: 44.423px;
+  height: 42.919px;
+  transform: rotate(10.66deg);
+}
+
+.permission-sticker-b img {
+  left: -200.75%;
+  top: -33.97%;
+}
+
+/* ----------------------------- The phone's prompt ----------------------------- */
+
+.permission-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  animation: permission-dim-in 220ms ease both;
+}
+
+@keyframes permission-dim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* iOS's own alert: a frosted 270pt card, title and message, stacked actions. */
+.ios-alert {
+  display: flex;
+  flex-direction: column;
+  width: 270px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(242, 242, 247, 0.86);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  font-family: -apple-system, 'SF Pro Text', var(--font);
+  text-align: center;
+  animation: ios-alert-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes ios-alert-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.ios-alert-text {
+  padding: 19px 16px 18px;
+}
+
+.ios-alert-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.4px;
+  color: #000;
+}
+
+.ios-alert-message {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: -0.08px;
+  color: #000;
+}
+
+.ios-alert-action {
+  height: 44px;
+  border-top: 0.5px solid rgba(60, 60, 67, 0.36);
+  font-family: inherit;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.4px;
+  color: #007aff;
+}
+
+.ios-alert-action:active {
+  background: rgba(0, 0, 0, 0.06);
+}

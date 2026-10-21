@@ -84,24 +84,23 @@ img {
   display: block;
 }
 
-/* Phone frame: full bleed on a handset, a centred 402x872 device on a laptop. */
-.phone {
-  position: relative;
-  width: 100%;
-  height: 100dvh;
+/* Phone frame: always a 402x874 device (iPhone 17's CSS viewport), centred.
+   App.tsx scales it down with --phone-scale when the window is smaller, so the
+   layout inside never reflows away from iPhone 17 dimensions. */
+body {
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  background: var(--avocado-land);
 }
 
-@media (min-width: 520px) {
-  body {
-    display: grid;
-    place-items: center;
-  }
-  .phone {
-    width: 402px;
-    height: min(872px, 96dvh);
-    border-radius: 44px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
-  }
+.phone {
+  position: relative;
+  flex: none;
+  width: 402px;
+  height: 874px;
+  overflow: hidden;
+  background: var(--avocado-land);
+  border-radius: 44px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  transform: scale(var(--phone-scale, 1));
 }

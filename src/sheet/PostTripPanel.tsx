@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { phoneScale } from '../phoneScale'
 import { useTrip } from '../state/tripContext'
 
 /**
@@ -22,7 +23,10 @@ export function PostTripPanel({ id, name }: { id: string; name: string }) {
     if (!el || !body) return
     // The tab pill floats over the foot of the sheet, so stopping at the edge
     // would leave the actions under it.
-    const hidden = el.getBoundingClientRect().bottom - (body.getBoundingClientRect().bottom - 120)
+    // Rects are in window pixels; scrolling is in the phone's layout pixels.
+    const scale = phoneScale()
+    const hidden =
+      (el.getBoundingClientRect().bottom - body.getBoundingClientRect().bottom) / scale + 120
     if (hidden > 0) body.scrollBy({ top: hidden, behavior: 'smooth' })
   }, [])
 

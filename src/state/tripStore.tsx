@@ -13,6 +13,7 @@ import {
   type PlaceOverride,
 } from '../data/placesApi'
 import { dayColour } from '../data/days'
+import { WRAPPED_FRAMES, WRAPPED_INVITE } from '../data/wrappedFrames'
 import {
   TripCtx,
   type Day,
@@ -24,6 +25,7 @@ import {
 
 type Action =
   | { type: 'openTrip' }
+  | { type: 'openExplore' }
   | { type: 'backToYou' }
   | { type: 'setTab'; tab: Tab }
   | { type: 'setSnap'; snap: TripState['snap'] }
@@ -37,6 +39,18 @@ type Action =
   | { type: 'closeGemDraft' }
   | { type: 'openReview'; id: string }
   | { type: 'closeReview' }
+  | { type: 'openCommentDraft'; id: string }
+  | { type: 'closeCommentDraft' }
+  | { type: 'setWrappedComment'; id: string; text: string }
+  | { type: 'openWrappedPhoto'; id: string }
+  | { type: 'closeWrappedPhoto' }
+  | { type: 'openWrappedStart' }
+  | { type: 'openWrappedInvite' }
+  | { type: 'advanceWrapped' }
+  | { type: 'retreatWrapped' }
+  | { type: 'closeWrapped' }
+  | { type: 'toggleWrappedPhoto'; id: string }
+  | { type: 'setBackgroundPhoto'; id: string }
   | { type: 'clearToast' }
   | { type: 'clearAdded' }
   | { type: 'setDiscover'; result: DiscoverResult }
@@ -102,13 +116,20 @@ const move = <T,>(list: T[], from: number, to: number): T[] => {
 }
 
 const initialState: TripState = {
-  screen: 'you',
+  screen: 'explore',
   tab: 'itinerary',
   snap: 'half',
   activePlaceId: null,
   postTripId: null,
   gemDraftId: null,
   reviewId: null,
+  commentDraftId: null,
+  viewingWrappedPhotoId: null,
+  wrapped: null,
+  wrappedEpoch: 0,
+  wrappedPhotos: [],
+  wrappedComments: {},
+  backgroundPhotoId: null,
   // The kangaroo zoo is deliberately absent — "Add to itinerary" is what puts
   // it here, which is the point of the flow.
   itinerary: SEEDED_STOPS.map(toItineraryItem),
@@ -133,6 +154,8 @@ function reducer(state: TripState, action: Action): TripState {
   switch (action.type) {
     case 'openTrip':
       return { ...state, screen: 'trip', snap: 'half' }
+    case 'openExplore':
+      return { ...state, screen: 'explore' }
     case 'backToYou':
       return { ...state, screen: 'you', activePlaceId: null }
     case 'setTab':
@@ -184,6 +207,47 @@ function reducer(state: TripState, action: Action): TripState {
       return { ...state, reviewId: action.id, postTripId: null }
     case 'closeReview':
       return { ...state, reviewId: null }
+    case 'openCommentDraft':
+      return { ...state, commentDraftId: action.id }
+    case 'closeCommentDraft':
+      return { ...state, commentDraftId: null }
+    case 'setWrappedComment': {
+      const text = action.text.trim()
+      const wrappedComments = { ...state.wrappedComments }
+      if (text) wrappedComments[action.id] = text
+      else delete wrappedComments[action.id]
+      return { ...state, wrappedComments }
+    }
+    case 'openWrappedPhoto':
+      return { ...state, viewingWrappedPhotoId: action.id }
+    case 'closeWrappedPhoto':
+      return { ...state, viewingWrappedPhotoId: null }
+    case 'openWrappedStart':
+      return { ...state, wrapped: 0 }
+    case 'openWrappedInvite':
+      return { ...state, wrapped: WRAPPED_INVITE, wrappedEpoch: state.wrappedEpoch + 1 }
+    case 'advanceWrapped':
+      // Past the last frame come the photo picker, the distribution preview it
+      // hands over to, the background it's framed against, and then the
+      // souvenir map that makes — where the story ends.
+      return { ...state, wrapped: Math.min((state.wrapped ?? 0) + 1, WRAPPED_FRAMES.length + 4) }
+    case 'retreatWrapped':
+      return { ...state, wrapped: state.wrapped ? state.wrapped - 1 : null }
+    case 'closeWrapped':
+      return { ...state, wrapped: null }
+    case 'toggleWrappedPhoto': {
+      // Kept in the order they were chosen, so removing one closes the gap and
+      // everything after it renumbers.
+      const on = state.wrappedPhotos.includes(action.id)
+      return {
+        ...state,
+        wrappedPhotos: on
+          ? state.wrappedPhotos.filter((id) => id !== action.id)
+          : [...state.wrappedPhotos, action.id],
+      }
+    }
+    case 'setBackgroundPhoto':
+      return { ...state, backgroundPhotoId: action.id }
     case 'clearToast':
       return { ...state, toast: null }
     case 'clearAdded':
@@ -316,6 +380,21 @@ export function TripProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // P jumps straight to the invite frame from anywhere in the prototype, so the
+  // walk can be skipped. Fields keep the key so typing is never stolen.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'p' && event.key !== 'P') return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      const el = event.target as HTMLElement | null
+      if (el?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? '')) return
+      event.preventDefault()
+      dispatch({ type: 'openWrappedInvite' })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   // Fetched places aren't in the static registry, so every id lookup goes
   // through here — the detail sheet and the map both resolve real places, and
   // designed places pick up their real photographs on the way past.
@@ -348,6 +427,7 @@ export function TripProvider({ children }: { children: ReactNode }) {
       ...state,
       discover,
       openTrip: () => dispatch({ type: 'openTrip' }),
+      openExplore: () => dispatch({ type: 'openExplore' }),
       backToYou: () => dispatch({ type: 'backToYou' }),
       setTab: (tab) => dispatch({ type: 'setTab', tab }),
       setSnap: (snap) => dispatch({ type: 'setSnap', snap }),
@@ -364,6 +444,18 @@ export function TripProvider({ children }: { children: ReactNode }) {
       closeGemDraft: () => dispatch({ type: 'closeGemDraft' }),
       openReview: (id) => dispatch({ type: 'openReview', id }),
       closeReview: () => dispatch({ type: 'closeReview' }),
+      openCommentDraft: (id) => dispatch({ type: 'openCommentDraft', id }),
+      closeCommentDraft: () => dispatch({ type: 'closeCommentDraft' }),
+      setWrappedComment: (id, text) => dispatch({ type: 'setWrappedComment', id, text }),
+      openWrappedPhoto: (id) => dispatch({ type: 'openWrappedPhoto', id }),
+      closeWrappedPhoto: () => dispatch({ type: 'closeWrappedPhoto' }),
+      openWrappedStart: () => dispatch({ type: 'openWrappedStart' }),
+      openWrappedInvite: () => dispatch({ type: 'openWrappedInvite' }),
+      advanceWrapped: () => dispatch({ type: 'advanceWrapped' }),
+      retreatWrapped: () => dispatch({ type: 'retreatWrapped' }),
+      closeWrapped: () => dispatch({ type: 'closeWrapped' }),
+      toggleWrappedPhoto: (id) => dispatch({ type: 'toggleWrappedPhoto', id }),
+      setBackgroundPhoto: (id) => dispatch({ type: 'setBackgroundPhoto', id }),
       clearToast: () => dispatch({ type: 'clearToast' }),
       clearAdded: () => dispatch({ type: 'clearAdded' }),
       hasGem: (id) => state.gems.includes(id),

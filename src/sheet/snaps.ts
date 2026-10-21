@@ -12,4 +12,14 @@ export const SNAP_FRACTION: Record<Snap, number> = {
   full: 0.82,
 }
 
+/**
+ * Maps Explore landing (Figma 1668:5717). Half is the designed rest — handle,
+ * University District, and the Wrapped tile sitting above the tab bar.
+ */
+export const EXPLORE_SNAP_FRACTION: Record<Snap, number> = {
+  peek: 0.22,
+  half: 0.385,
+  full: 0.72,
+}
+
 export const SNAP_ORDER: Snap[] = ['peek', 'half', 'full']

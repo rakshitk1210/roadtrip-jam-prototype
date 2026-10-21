@@ -1,5 +1,9 @@
 import { Icon } from '../components/Icon'
+import { MapsTabBar } from '../components/MapsTabBar'
+import { StatusBar } from '../components/StatusBar'
+import { CURATION_PHOTOS } from '../data/curationPhotos'
 import { useTrip } from '../state/tripContext'
+import { WrappedPhotoDetailScreen } from './WrappedPhotoDetailScreen'
 
 const AVATARS = [
   '/assets/you-avatar-1.jpg',
@@ -15,11 +19,16 @@ const AVATARS = [
  * 1435:13748).
  */
 export function YouScreen() {
-  const { openTrip } = useTrip()
+  const { openTrip, openExplore, wrappedPhotos, viewingWrappedPhotoId, openWrappedPhoto } = useTrip()
+  const wrappedTiles = wrappedPhotos
+    .map((id) => CURATION_PHOTOS.find((photo) => photo.id === id))
+    .filter((photo): photo is (typeof CURATION_PHOTOS)[number] => Boolean(photo))
 
   return (
     <div className="you-screen">
-      <img className="you-bg" src="/assets/you-bg.jpg" alt="" />
+      {/* The screenshot's own status bar is painted out, so the live one reads 9:41. */}
+      <img className="you-bg" src="/assets/you-bg-clean.jpg" alt="" />
+      <StatusBar className="status-bar-on-map" />
 
       <div className="you-sheet">
         <span className="you-handle" />
@@ -48,14 +57,32 @@ export function YouScreen() {
           </div>
         </button>
 
+        {wrappedTiles.length > 0 && (
+          <div className="you-photos">
+            <p className="you-photos-head">Your Road Trip Wrapped</p>
+            <div className="you-photos-grid">
+              {wrappedTiles.map((photo) => (
+                <button
+                  key={photo.id}
+                  className="you-photo-tile"
+                  onClick={() => openWrappedPhoto(photo.id)}
+                  aria-label={`Open ${photo.location}`}
+                >
+                  <img src={photo.src} alt="" style={{ objectPosition: photo.position }} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="you-recents">
           <img src="/assets/you-recent-places.jpg" alt="Your recent places" />
         </div>
       </div>
 
-      <div className="you-nav">
-        <img src="/assets/you-recent-places.jpg" alt="" />
-      </div>
+      <MapsTabBar active="you" onExplore={openExplore} />
+
+      {viewingWrappedPhotoId && <WrappedPhotoDetailScreen photoId={viewingWrappedPhotoId} />}
     </div>
   )
 }

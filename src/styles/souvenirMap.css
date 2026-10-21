@@ -1,0 +1,484 @@
+/* Road Trip Wrapped — the souvenir the picker builds: Figma 2002:1373. Every
+   position here is hand-placed against the route line, so the numbers are the
+   comp's own. Shares the story's easing and glass from wrapped.css. */
+
+:root {
+  /* Stickers land with a little overshoot, the way something pressed on by hand
+     settles. Everything else takes the story's ease. */
+  --souvenir-pop: cubic-bezier(0.34, 1.42, 0.64, 1);
+}
+
+.souvenir {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  background: #001c29;
+  opacity: 0;
+  transition: opacity 520ms ease;
+}
+
+.souvenir.is-in {
+  opacity: 1;
+}
+
+/* ============================ The photograph under ============================ */
+
+/* Figma 2002:1374 draws the shot to the full 402×880 rather than cropping it to
+   fit, so the whole group stays in frame — the slight narrowing that costs is
+   the design's own. */
+.souvenir-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 402px;
+  height: 880px;
+  max-width: none;
+  object-fit: fill;
+}
+
+.souvenir-crown,
+.souvenir-wash,
+.souvenir-tint {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.souvenir-crown {
+  top: 0;
+  height: 217px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 10.096%, rgba(217, 217, 217, 0) 100%);
+}
+
+.souvenir-wash {
+  top: 657px;
+  height: 217px;
+  background: linear-gradient(180deg, rgba(217, 217, 217, 0) 0%, rgba(0, 0, 0, 0.4) 89.904%);
+}
+
+/* The cold cast the whole frame is pulled under, so the white ink reads as ink. */
+.souvenir-tint {
+  top: 0;
+  height: 874px;
+  background: rgba(0, 28, 41, 0.4);
+}
+
+.souvenir .status-bar-on-dark {
+  z-index: 2;
+  background: none;
+}
+
+/* ================================== The title ================================== */
+
+.souvenir-kicker {
+  position: absolute;
+  left: 23px;
+  top: 61px;
+  z-index: 2;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 300;
+  line-height: 12px;
+  color: #eef5f8;
+}
+
+/* Set in the file's own hand-drawn face, which nothing but the Figma editor has —
+   so the line ships as outlines rather than as type, centred in the 402-wide box
+   Figma 2002:1412 gives it. */
+.souvenir-title {
+  position: absolute;
+  left: 21px;
+  top: 80.5px;
+  z-index: 2;
+  width: 360px;
+  height: 36px;
+  max-width: none;
+}
+
+/* ================================== The route ================================== */
+
+/* Figma 2002:1408 turns the drawing 4.86deg about the middle of the box it was
+   drawn in, which is what these origins are measured from. */
+.souvenir-route {
+  position: absolute;
+  left: 41.16px;
+  top: 201.85px;
+  z-index: 2;
+  width: 339.109px;
+  height: 373.3px;
+  max-width: none;
+  transform: rotate(-4.86deg);
+  transform-origin: 166.93px 185.49px;
+  pointer-events: none;
+}
+
+/* ================================ Stops on it ================================ */
+
+.souvenir-stop {
+  position: absolute;
+  z-index: 3;
+}
+
+.souvenir-stop-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50px;
+  object-fit: cover;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Drawn round each print by hand, and left at the angle it was drawn at. */
+.souvenir-stop-ring {
+  position: absolute;
+  left: calc(50% - 22px);
+  top: calc(50% - 22px);
+  width: 44px;
+  height: 44px;
+  max-width: none;
+  transform: rotate(21.52deg);
+}
+
+/* The visitor center is a map card rather than a print, so it keeps its corners
+   and gets the looser ring the design draws for it. */
+.souvenir-stop.is-card .souvenir-stop-photo {
+  left: 1.7px;
+  top: 0.8px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.souvenir-stop.is-card .souvenir-stop-ring {
+  left: 5.13px;
+  top: -2.43px;
+  width: 39.4277px;
+  height: 40.5087px;
+  transform: none;
+}
+
+/* ================================== The marks ================================== */
+
+.souvenir-label,
+.souvenir-end {
+  position: absolute;
+  z-index: 4;
+  margin: 0;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.24px;
+  /* The comp's own leading: tight enough that a two-line name reads as one mark. */
+  line-height: 9.353px;
+  color: #fff;
+  transform: translateY(-50%);
+}
+
+.souvenir-label.has-shadow,
+.souvenir-end.has-shadow {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* The car parked where the trip started, ringed by the same hand as the stops. */
+.souvenir-car {
+  position: absolute;
+  left: 13.51px;
+  top: 551.5px;
+  z-index: 3;
+  width: 78.0026px;
+  height: 54.9999px;
+}
+
+.souvenir-car-photo {
+  position: absolute;
+  left: 6.93px;
+  top: 4.36px;
+  width: 63.685px;
+  height: 42.456px;
+  max-width: none;
+  object-fit: cover;
+  transform: rotate(159.35deg) scaleY(-1);
+}
+
+.souvenir-car-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+/* A find worth keeping, stuck on where the route bends towards the farm. */
+.souvenir-gem {
+  position: absolute;
+  left: 114.75px;
+  top: 337.87px;
+  z-index: 4;
+  width: 31.366px;
+  height: 27.678px;
+}
+
+.souvenir-gem-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 31.366px;
+  height: 27.678px;
+  max-width: none;
+}
+
+.souvenir-gem-clip {
+  position: absolute;
+  left: 5.25px;
+  top: 2.13px;
+  width: 21.99px;
+  height: 24.05px;
+  overflow: hidden;
+}
+
+.souvenir-gem-clip img {
+  position: absolute;
+  left: -10.31px;
+  top: -21.3px;
+  width: 42.6px;
+  height: 60.47px;
+  max-width: none;
+}
+
+/* ================================== The count ================================== */
+
+/* Set in the typewriter face the design uses, the way a logbook would have it. */
+.souvenir-stats {
+  position: absolute;
+  left: 26px;
+  top: 648px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 202px;
+  margin: 0;
+  font-family: 'Special Elite', 'Courier New', monospace;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.souvenir-stat {
+  position: relative;
+  height: 29.353px;
+}
+
+.souvenir-stat dt,
+.souvenir-stat dd {
+  position: absolute;
+  left: 0;
+  margin: 0;
+  white-space: nowrap;
+  /* The comp sets both lines in a 9.353 box and lets the glyphs sit past it,
+     which is what keeps the label so close over its number. */
+  line-height: 9.353px;
+}
+
+.souvenir-stat dt {
+  top: 0;
+  font-size: 10px;
+  letter-spacing: -0.2px;
+}
+
+.souvenir-stat dd {
+  top: 20px;
+  font-size: 20px;
+  letter-spacing: -0.4px;
+}
+
+/* ================================== Chrome ================================== */
+
+/* The design draws a flat 5% pane here; the prototype's glass is the same shape
+   with the blur that makes it read over a photograph. */
+.wrapped-glass.souvenir-share {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  z-index: 5;
+  gap: 0;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border-radius: 50px;
+}
+
+.wrapped-glass.souvenir-share img {
+  width: 16px;
+  height: 22px;
+  opacity: 0.9;
+}
+
+.wrapped-foot.souvenir-foot {
+  z-index: 5;
+  left: 26px;
+  bottom: 40px;
+  gap: 3px;
+}
+
+/* ================================= Assembling ================================= */
+
+/* The route arrives first and the stops land along it in the order they were
+   driven, so the map draws itself the way the trip was made. */
+.souvenir.is-in .souvenir-route {
+  animation: souvenir-route-in 900ms var(--wrapped-ease) 600ms both;
+}
+
+@keyframes souvenir-route-in {
+  from {
+    opacity: 0;
+    transform: rotate(-4.86deg) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-4.86deg) scale(1);
+  }
+}
+
+.souvenir-kicker,
+.souvenir-title {
+  opacity: 0;
+}
+
+.souvenir.is-in .souvenir-kicker {
+  animation: souvenir-fade 800ms var(--wrapped-ease) 260ms both;
+}
+
+.souvenir.is-in .souvenir-title {
+  animation: souvenir-title-in 900ms var(--wrapped-ease) 380ms both;
+}
+
+@keyframes souvenir-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.souvenir-stop,
+.souvenir-car,
+.souvenir-gem {
+  opacity: 0;
+}
+
+.souvenir.is-in .souvenir-stop,
+.souvenir.is-in .souvenir-car,
+.souvenir.is-in .souvenir-gem {
+  animation: souvenir-stick 480ms var(--souvenir-pop) both;
+}
+
+@keyframes souvenir-stick {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Names fade rather than pop: they are written beside the print, not pressed on
+   with it, and they are already held off-centre by their own transform. */
+.souvenir-label,
+.souvenir-end {
+  opacity: 0;
+}
+
+/* Each carries its own delay inline, timed to the print it names. */
+.souvenir.is-in .souvenir-label,
+.souvenir.is-in .souvenir-end {
+  animation: souvenir-fade 620ms var(--wrapped-ease) both;
+}
+
+@keyframes souvenir-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.souvenir-stat {
+  opacity: 0;
+}
+
+.souvenir.is-in .souvenir-stat {
+  animation: souvenir-rise 900ms var(--wrapped-ease) both;
+}
+
+@keyframes souvenir-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.wrapped-glass.souvenir-share {
+  opacity: 0;
+}
+
+.souvenir.is-in .wrapped-glass.souvenir-share {
+  animation: souvenir-stick 460ms var(--souvenir-pop) 3000ms both;
+}
+
+/* ============================== Skip to the end ============================== */
+
+.souvenir.is-settled {
+  opacity: 1;
+  transition: none;
+}
+
+.souvenir.is-settled .souvenir-kicker,
+.souvenir.is-settled .souvenir-title,
+.souvenir.is-settled .souvenir-stop,
+.souvenir.is-settled .souvenir-car,
+.souvenir.is-settled .souvenir-gem,
+.souvenir.is-settled .souvenir-label,
+.souvenir.is-settled .souvenir-end,
+.souvenir.is-settled .souvenir-stat,
+.souvenir.is-settled .wrapped-glass.souvenir-share {
+  animation: none;
+  opacity: 1;
+}
+
+.souvenir.is-settled .souvenir-route {
+  animation: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .souvenir,
+  .souvenir.is-in {
+    opacity: 1;
+    transition: none;
+  }
+
+  .souvenir-kicker,
+  .souvenir-title,
+  .souvenir-route,
+  .souvenir-stop,
+  .souvenir-car,
+  .souvenir-gem,
+  .souvenir-label,
+  .souvenir-end,
+  .souvenir-stat,
+  .wrapped-glass.souvenir-share {
+    animation: none !important;
+    opacity: 1;
+  }
+}

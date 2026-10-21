@@ -2,9 +2,15 @@ import { createContext, useContext } from 'react'
 import type { Place, SavedPlace } from '../data/places'
 import type { PlaceOverride } from '../data/placesApi'
 
-export type Screen = 'you' | 'trip'
+export type Screen = 'explore' | 'you' | 'trip'
 export type Tab = 'itinerary' | 'discover'
 export type Snap = 'peek' | 'half' | 'full'
+/**
+ * Position in the Road Trip Wrapped story, layered over the Explore sheet: 0 is
+ * the intro, 1 onwards are the frames in `WRAPPED_FRAMES`, then the photo picker
+ * the story hands over to, and last the souvenir map the picking makes.
+ */
+export type WrappedPhase = null | number
 
 export interface ItineraryItem {
   id: string
@@ -35,6 +41,26 @@ export interface TripState {
   gemDraftId: string | null
   /** Non-null while the review form is up. */
   reviewId: string | null
+  /** Non-null while the Wrapped photo-comment overlay is up, naming the photo it drafts for. */
+  commentDraftId: string | null
+  /** Non-null while a Wrapped photo is open full-screen from the You tab. */
+  viewingWrappedPhotoId: string | null
+  /** Road Trip Wrapped overlay, layered over whichever screen is underneath. */
+  wrapped: WrappedPhase
+  /**
+   * Bumped whenever the story is jumped to a frame so that screen remounts even
+   * if it was already showing, and the sequence plays from the top.
+   */
+  wrappedEpoch: number
+  /**
+   * The photos chosen for the map, in the order they were chosen — which is the
+   * order their badges number them in, so dropping one renumbers the rest.
+   */
+  wrappedPhotos: string[]
+  /** Captions on Wrapped photos, keyed by photo id. An absent key means no comment. */
+  wrappedComments: Record<string, string>
+  /** Which photo is picked as the souvenir's background — cosmetic only. */
+  backgroundPhotoId: string | null
   gems: string[]
   toast: string | null
   /**
@@ -67,6 +93,7 @@ export interface TripState {
 
 export interface TripValue extends TripState {
   openTrip: () => void
+  openExplore: () => void
   backToYou: () => void
   setTab: (tab: Tab) => void
   setSnap: (snap: Snap) => void
@@ -85,6 +112,23 @@ export interface TripValue extends TripState {
   closeGemDraft: () => void
   openReview: (id: string) => void
   closeReview: () => void
+  openCommentDraft: (id: string) => void
+  closeCommentDraft: () => void
+  /** Sets a photo's caption, or clears it when text is empty. */
+  setWrappedComment: (id: string, text: string) => void
+  openWrappedPhoto: (id: string) => void
+  closeWrappedPhoto: () => void
+  openWrappedStart: () => void
+  /** Jumps the story to the invite frame, remounting it if it is already up. */
+  openWrappedInvite: () => void
+  /** Moves the story on to its next frame, stopping at the last one. */
+  advanceWrapped: () => void
+  /** Steps the story back a frame, closing it from the intro. */
+  retreatWrapped: () => void
+  closeWrapped: () => void
+  /** Adds a photo to the map, or takes it back off and closes the gap it leaves. */
+  toggleWrappedPhoto: (id: string) => void
+  setBackgroundPhoto: (id: string) => void
   clearToast: () => void
   /** Drops the highlight from the newly added stop. */
   clearAdded: () => void

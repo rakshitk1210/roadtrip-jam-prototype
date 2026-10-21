@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type RefObject } from 'react'
+import { phoneScale, phoneY } from '../phoneScale'
 
 interface Drag {
   /** Position of the lifted element in the measured list. */
@@ -49,19 +50,21 @@ export function useReorder(
       )
       const own = rects[index]
       if (!own) return
+      // Rects are in window pixels; the drag works in the phone's layout pixels.
+      const scale = phoneScale()
 
       // Captured immediately: the handle has nothing to do on a plain tap, and
       // waiting for a threshold would lose the moves that leave the handle.
       e.preventDefault()
       e.stopPropagation()
       e.currentTarget.setPointerCapture(e.pointerId)
-      startY.current = e.clientY
+      startY.current = phoneY(e)
       apply({
         index,
-        height: own.height,
+        height: own.height / scale,
         dy: 0,
         to: index,
-        centers: rects.map((r) => r.top + r.height / 2),
+        centers: rects.map((r) => (r.top + r.height / 2) / scale),
       })
     },
     [containerRef, selector],
@@ -71,7 +74,7 @@ export function useReorder(
     const current = dragRef.current
     if (!current) return
 
-    const dy = e.clientY - startY.current
+    const dy = phoneY(e) - startY.current
     const center = current.centers[current.index] + dy
 
     // Whichever slot the lifted element now sits closest to is the target.

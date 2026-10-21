@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Snap } from '../state/tripContext'
 import { SNAP_FRACTION, SNAP_ORDER as ORDER } from './snaps'
+import { phoneY } from '../phoneScale'
 
 interface Props {
   snap: Snap
@@ -9,13 +10,22 @@ interface Props {
   header?: ReactNode
   children: ReactNode
   className?: string
+  /** Defaults to the trip-map snaps. Explore passes its own so the tile peeks. */
+  snapFractions?: Record<Snap, number>
 }
 
 /**
  * Draggable three-snap sheet. The sheet is always laid out at its tallest snap
  * and translated down to reveal less, so its content never reflows mid-drag.
  */
-export function BottomSheet({ snap, onSnapChange, header = null, children, className = '' }: Props) {
+export function BottomSheet({
+  snap,
+  onSnapChange,
+  header = null,
+  children,
+  className = '',
+  snapFractions = SNAP_FRACTION,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const [drag, setDrag] = useState<{ startY: number; startTranslate: number; y: number; t: number } | null>(null)
   const [viewport, setViewport] = useState(() => window.innerHeight)
@@ -27,10 +37,10 @@ export function BottomSheet({ snap, onSnapChange, header = null, children, class
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  const fullPx = viewport * SNAP_FRACTION.full
+  const fullPx = viewport * snapFractions.full
   const translateFor = useCallback(
-    (s: Snap) => fullPx - viewport * SNAP_FRACTION[s],
-    [fullPx, viewport],
+    (s: Snap) => fullPx - viewport * snapFractions[s],
+    [fullPx, viewport, snapFractions],
   )
 
   const translate = drag
@@ -41,24 +51,24 @@ export function BottomSheet({ snap, onSnapChange, header = null, children, class
     // Buttons living in the drag zone (the tabs) keep their taps: capturing the
     // pointer here would swallow the click that follows.
     if ((e.target as HTMLElement).closest('button')) return
-    setDrag({ startY: e.clientY, startTranslate: translateFor(snap), y: e.clientY, t: performance.now() })
+    setDrag({ startY: phoneY(e), startTranslate: translateFor(snap), y: phoneY(e), t: performance.now() })
   }
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!drag) return
     // Capture only once the gesture is clearly a drag, so a stray press still
     // resolves as a tap.
-    if (Math.abs(e.clientY - drag.startY) > 4 && !e.currentTarget.hasPointerCapture(e.pointerId)) {
+    if (Math.abs(phoneY(e) - drag.startY) > 4 && !e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.setPointerCapture(e.pointerId)
     }
-    setDrag({ ...drag, y: e.clientY })
+    setDrag({ ...drag, y: phoneY(e) })
   }
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (!drag) return
     const dt = Math.max(1, performance.now() - drag.t)
-    const velocity = (e.clientY - drag.startY) / dt // px per ms, positive = downward
-    const current = drag.startTranslate + (e.clientY - drag.startY)
+    const velocity = (phoneY(e) - drag.startY) / dt // px per ms, positive = downward
+    const current = drag.startTranslate + (phoneY(e) - drag.startY)
     setDrag(null)
 
     // A decisive flick moves one snap in that direction; otherwise settle on the

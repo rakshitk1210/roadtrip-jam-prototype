@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 402 874" preserveAspectRatio="xMidYMid slice">
+  <!-- A generic stretch of map in dark mode: land, water, parks, roads. No labels. -->
+
+  <!-- Land -->
+  <rect width="402" height="874" fill="#10241a"/>
+
+  <!-- Forest / park cover, a shade lighter than the land -->
+  <g fill="#14301f">
+    <path d="M250 0 H402 V250 C372 262 348 236 322 248 C294 262 270 238 262 206 C254 172 228 160 236 124 C244 88 226 60 250 0 Z"/>
+    <path d="M300 640 C332 618 372 628 402 612 V874 H286 C270 840 300 812 286 780 C272 748 250 720 268 690 C278 672 284 652 300 640 Z"/>
+    <path d="M150 300 C172 288 196 300 200 322 C204 344 184 362 162 358 C140 354 128 312 150 300 Z"/>
+    <path d="M60 690 C84 676 116 688 118 714 C120 740 96 754 72 748 C48 742 38 704 60 690 Z"/>
+  </g>
+  <g fill="#173622">
+    <path d="M318 40 C346 30 380 48 384 82 C388 116 360 136 334 128 C308 120 292 54 318 40 Z"/>
+    <path d="M340 700 C362 690 390 704 390 730 C390 756 366 770 344 762 C322 754 320 712 340 700 Z"/>
+  </g>
+
+  <!-- Water: a sound along the west edge, an island, a long mountain lake and the river out of it -->
+  <g fill="#0a1922">
+    <path d="M0 0 H96 C88 40 112 70 94 106 C76 142 40 152 52 192 C64 232 112 242 106 292 C100 332 60 346 58 392 C56 432 82 456 72 502 C64 542 22 562 0 576 Z"/>
+    <path d="M222 618 C236 592 268 590 286 572 C304 554 318 528 346 520 C370 513 392 522 402 516 V548 C384 552 366 546 352 558 C334 574 326 598 300 608 C276 618 252 612 238 632 C230 644 214 636 222 618 Z"/>
+    <path d="M150 470 C164 462 182 470 182 486 C182 502 166 510 152 504 C138 498 136 478 150 470 Z"/>
+  </g>
+  <path d="M30 236 C42 228 58 236 56 250 C54 264 38 268 28 260 C18 252 20 242 30 236 Z" fill="#10241a"/>
+  <path d="M230 630 C220 668 236 700 222 738 C210 772 226 812 214 874" fill="none" stroke="#0a1922" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Minor roads: a loose, curving network -->
+  <g fill="none" stroke="#1b3a28" stroke-width="1.3" stroke-linecap="round">
+    <path d="M110 0 C120 60 140 90 138 150 C136 210 160 250 170 300"/>
+    <path d="M96 120 C140 132 190 124 240 140 C290 156 330 150 402 168"/>
+    <path d="M60 420 C110 410 150 430 200 418 C250 406 300 420 402 404"/>
+    <path d="M200 0 C204 70 190 130 210 190 C230 250 214 300 230 360"/>
+    <path d="M0 640 C50 630 90 650 140 640 C180 632 210 646 230 640"/>
+    <path d="M120 874 C126 820 108 780 120 730 C130 690 120 660 140 640"/>
+    <path d="M300 360 C320 420 300 470 330 520"/>
+    <path d="M60 520 C100 540 130 530 170 560 C200 582 220 600 240 612"/>
+    <path d="M330 874 C340 830 320 800 340 770"/>
+    <path d="M250 240 C290 260 320 300 360 300 C380 300 392 290 402 286"/>
+    <path d="M0 780 C40 770 70 790 120 780"/>
+  </g>
+
+  <!-- A small town grid by the water -->
+  <g fill="none" stroke="#1b3a28" stroke-width="1" transform="rotate(-8 170 200)">
+    <path d="M120 170 H220 M120 190 H220 M120 210 H220 M120 230 H220"/>
+    <path d="M130 160 V240 M152 160 V240 M174 160 V240 M196 160 V240 M218 160 V240"/>
+  </g>
+
+  <!-- Highways: two through-routes, slightly brighter -->
+  <g fill="none" stroke="#24472f" stroke-width="2.6" stroke-linecap="round">
+    <path d="M150 0 C146 80 168 140 160 220 C152 300 128 360 136 440 C144 520 120 600 130 700 C136 760 122 820 128 874"/>
+    <path d="M136 440 C190 430 230 452 270 432 C310 412 330 380 360 372 C380 366 392 368 402 364"/>
+  </g>
+</svg>
