@@ -10,7 +10,7 @@ the [main Roadtrip Jam prototype](https://github.com/rakshitk1210/roadtrip-jam-p
 (its trip map is still inside, under the You tab) but doesn't need to stay in
 sync with it.
 
-**Live demo:** _add your Vercel URL here_
+**Live demo:** https://road-trip-wrapped.vercel.app/
 
 Designs: [Figma — Playground](https://www.figma.com/design/SkeL1hPeH14hgjr1h4akzz/Playground)
 
