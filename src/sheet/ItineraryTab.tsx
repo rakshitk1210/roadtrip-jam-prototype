@@ -175,7 +175,7 @@ export function ItineraryTab() {
             <Icon name="close" size={20} />
           </button>
         ) : (
-          <button className="pill pill-outline pill-sm" onClick={enterSelect}>
+          <button className="pill pill-dim" onClick={enterSelect}>
             Select
           </button>
         )}

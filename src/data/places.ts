@@ -36,8 +36,8 @@ export interface Place {
   knowBeforeYouGo: [string, string]
   /**
    * The richer cafe sheet: the name spelled out, the distance on the rating
-   * line, and the curated badge and a friend's note over the photos. Places
-   * without it keep the plain sheet, hours line and all.
+   * line, and a friend's note over the photos. Places without it keep the
+   * plain sheet, hours line and all.
    */
   detail?: {
     title: string
@@ -156,6 +156,9 @@ export const STICKER_ART = {
   kayak: { src: '/assets/sticker-art-kayak.svg', ratio: 87.1009 / 54.4381 },
   visitorCenter: { src: '/assets/sticker-art-visitor-center.svg', ratio: 72.5081 / 45.0726 },
   food: { src: '/assets/sticker-art-burger.svg', ratio: 73 / 52.1429 },
+  mocoloco: { src: '/assets/mocoloco.svg', ratio: 358 / 221 },
+  alpaca: { src: '/assets/alpaca.svg', ratio: 85 / 54 },
+  blueBird: { src: '/assets/sticker-art-blue-bird.png', ratio: 219 / 138 },
 } satisfies Record<string, StickerArt>
 
 export type StickerArtId = keyof typeof STICKER_ART
@@ -174,6 +177,9 @@ const STICKER_ART_BY_PLACE: Record<string, StickerArtId> = {
   'mountain-view-cafe': 'food',
   'sunset-beach-bbq': 'food',
   'historic-downtown': 'visitorCenter',
+  'kona-kitchen': 'mocoloco',
+  'strawberry-fields-alpaca': 'alpaca',
+  'blue-bird-cafe': 'blueBird',
 }
 
 /** Name keywords, in priority order, for places that arrive from Places. */
@@ -397,8 +403,39 @@ export const SAVED: SavedPlace[] = [
   },
 ]
 
-/** The two stops the itinerary starts with, so those rows open a sheet too. */
+/** The stops the itinerary starts with, so those rows open a sheet too. */
 export const SEEDED_STOPS: Place[] = [
+  {
+    id: 'strawberry-fields-alpaca',
+    name: 'Strawberry Fields Alpaca Ranch',
+    mapLabel: 'Alpaca Ranch',
+    hours: 'Tours by appointment',
+    mapDetail: '⭐ Top rated nearby',
+    rating: 4.8,
+    reviews: 42,
+    coord: [-122.0916, 48.1229], // 13924 McElroy Rd NE, Arlington
+    thumb: PADDLER,
+    photos: [PADDLER, LAKE, KAYAK],
+    knowBeforeYouGo: [
+      'Tours are by appointment — confirm before you drive up McElroy Rd',
+      'Closed-toe shoes; the animals will investigate anything that looks like food',
+    ],
+  },
+  {
+    id: 'blue-bird-cafe',
+    name: 'Blue Bird Cafe',
+    hours: 'Opens 5:00am Thu',
+    mapDetail: '⭐ Top rated nearby',
+    rating: 4.5,
+    reviews: 184,
+    coord: [-122.1264, 48.1965], // 308 N Olympic Ave, Arlington
+    thumb: '/assets/kona-kitchen-tile.jpg',
+    photos: ['/assets/kona-kitchen-tile.jpg', PADDLER, LAKE],
+    knowBeforeYouGo: [
+      'Family-owned since 1958 — the blueberry pancakes are the order, and they sell out on weekend mornings',
+      'Free street parking on N Olympic Ave; breakfast starts at 5am if you want an early start into the mountains',
+    ],
+  },
   {
     id: 'kayak-rental',
     name: 'Kayak rental',
@@ -511,6 +548,16 @@ export const REAL_WORLD_MATCHES: { id: string; query: string; coord: LngLat }[] 
   },
   { id: 'ladder-creek-falls', query: 'Ladder Creek Falls, Newhalem, WA', coord: [-121.2394, 48.6754] },
   { id: 'diablo-lake-vista', query: 'Diablo Lake Vista Point, WA', coord: [-121.0974, 48.7099] },
+  {
+    id: 'strawberry-fields-alpaca',
+    query: 'Strawberry Fields Alpaca Ranch, Arlington, WA',
+    coord: [-122.0916, 48.1229],
+  },
+  {
+    id: 'blue-bird-cafe',
+    query: 'Blue Bird Cafe, Arlington, WA',
+    coord: [-122.1264, 48.1965],
+  },
 ]
 
 /**
@@ -538,7 +585,7 @@ export const CURATED_PLACES: Place[] = [
       title: 'Kona Kitchen - Seattle',
       note: {
         text: 'The great grandson of Chozen from Cobra Kai was our waiter!',
-        author: 'Cindy marked as a Hidden Gem',
+        author: 'Discovered by Cindy and 37 others',
         avatar: '/assets/cindy.png',
       },
     },
@@ -551,8 +598,8 @@ export const CURATED_PLACES: Place[] = [
     rating: 4.5,
     reviews: 478,
     coord: [-122.2015, 47.9781], // Everett, first stop out of the city
-    thumb: KAYAK,
-    photos: [KAYAK, PADDLER, LAKE],
+    thumb: '/assets/kone-bar-grill-tile.jpg',
+    photos: ['/assets/kone-bar-grill-tile.jpg', PADDLER, LAKE],
     knowBeforeYouGo: [
       'Half the menu is vegetarian, and the kitchen will veganise most of the rest',
       'The patio is heated, so it stays usable well past sunset',
@@ -574,7 +621,7 @@ export interface CuratedCard {
   placeId: string
   badge: string
   distanceMi: number
-  /** Set where the badge is attributed to someone — the 28px face beside it. */
+  /** Set where the badge is attributed to someone — the 26px face before it. */
   avatar?: string
   /**
    * Overrides the place's own photo. The card art is art-directed in Figma,
@@ -599,11 +646,17 @@ export const CURATED_HERO: CuratedCard = {
 export const CURATED_RAIL: CuratedCard[] = [
   {
     placeId: 'kona-kitchen',
-    badge: '💎 Discovered by 37 people',
+    badge: 'Cindy marked as Hidden Gem 💎',
     distanceMi: 0.8,
     avatar: '/assets/cindy.png',
+    image: '/assets/kona-kitchen-tile.jpg',
   },
-  { placeId: 'kone-bar-grill', badge: '🌱 Vegetarian-Friendly', distanceMi: 1.5 },
+  {
+    placeId: 'kone-bar-grill',
+    badge: '🌱 Vegetarian-Friendly',
+    distanceMi: 1.5,
+    image: '/assets/kone-bar-grill-tile.jpg',
+  },
   { placeId: 'diablo-lake-hike', badge: '✅ Must Do', distanceMi: 1.5 },
 ]
 

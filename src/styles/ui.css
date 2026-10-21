@@ -103,6 +103,19 @@
   color: var(--ink-secondary);
 }
 
+.rating-cluster {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rating-dot,
+.rating-suffix,
+.rating-gem {
+  flex: none;
+  white-space: nowrap;
+}
+
 /* Rating sits beside a fixed-width action, so it truncates rather than
    sliding underneath it. */
 .itin-text,
@@ -116,7 +129,7 @@
   white-space: nowrap;
 }
 
-.rating-lg {
+.rating-lg .rating-cluster {
   gap: 4px;
 }
 
@@ -130,24 +143,24 @@
   font-size: 15px;
 }
 
-.rating-sm .rating-value {
+.rating-sm {
+  height: 20px;
   font-size: 12px;
+  line-height: 16px;
   font-weight: 400;
 }
 
-.rating-sm .rating-count {
+.rating-sm .rating-value,
+.rating-sm .rating-count,
+.rating-sm .rating-dot,
+.rating-sm .rating-suffix,
+.rating-sm .rating-gem {
   font-size: 12px;
+  line-height: 16px;
 }
 
 .stars {
   display: inline-flex;
-}
-
-/* The gem trails the line rather than leading it, so a row reads as its rating
-   first and what you made of it second. */
-.rating-gem {
-  flex: none;
-  white-space: nowrap;
 }
 
 .toast {
@@ -567,11 +580,16 @@
 
 /* Padding on a flex item that also scrolls is ignored for scroll height, so
    the last row sat under the floating tab pill. A trailing block is content,
-   and is what actually lets either tab scroll clear of it. */
+   and is what actually lets either tab scroll clear of it.
+
+   The sheet is laid out at its tallest and translated down, so at every snap
+   but full a slice of this container hangs below the screen. The spacer has to
+   cover that slice before it counts for anything, then the 88px the tab pill
+   occupies, and then a margin so the last row clears rather than touches. */
 .sheet-body::after {
   content: '';
   display: block;
-  height: 160px;
+  height: calc(var(--sheet-hidden, 0px) + 104px);
 }
 
 .sheet-detail .sheet-body {
@@ -901,39 +919,43 @@
   overflow: hidden;
 }
 
-/* Both overlays sit on the lead photo: what other people made of the place,
-   over the place itself. */
-.collage-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.5);
-  font-size: 9px;
-  line-height: 1.4;
-  color: #fff;
-  white-space: nowrap;
-}
-
 .collage-note {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 235px;
-  height: 78px;
+  width: 261px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   padding: 14px 17px;
   border-radius: 8px;
   background: var(--blue-container);
 }
 
 .collage-note-text {
+  position: relative;
   margin: 0;
-  font-size: 12px;
-  line-height: 16px;
+  padding: 0 12px 0 10px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-primary);
+}
+
+.collage-quote {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+}
+
+.collage-quote.is-open {
+  left: 0;
+  top: 0;
+  transform: rotate(180deg);
+}
+
+.collage-quote.is-close {
+  left: 208px;
+  top: 20px;
 }
 
 .collage-note-by {
@@ -941,16 +963,16 @@
   align-items: center;
   gap: 5px;
   margin: 0;
-  font-size: 10px;
-  line-height: 12px;
-  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ink-secondary);
 }
 
 .collage-note-by img {
   flex: none;
-  width: 12px;
-  height: 12px;
-  border: 0.5px solid #fff;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
   object-fit: cover;
 }
@@ -1080,12 +1102,14 @@
   to { transform: scale(1); }
 }
 
-/* Header row inside each tab: title plus its one action. */
+/* Header row inside each tab: title plus its one action. Horizontal padding is
+   20px from the sheet edge (Figma 1947:11584), so the body gutter is reversed. */
 .sheet-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin: 0 -16px;
   /* The 20px handle above plus this makes Figma's 40px from the sheet edge. */
   padding: 20px 20px 8px;
 }
@@ -1107,6 +1131,17 @@
   border: 1px solid #d6d9dd;
   background: #fff;
   color: var(--ink-primary);
+}
+
+/* Itinerary "Select" — Figma 1947:11586. A filled dim pill, not an outline. */
+.pill-dim {
+  padding: 8px 12px;
+  background: var(--surface-dim);
+  color: var(--ink-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
 }
 
 .pill-primary {
@@ -1155,43 +1190,53 @@
   color: var(--green-badge);
 }
 
-/* ---------- Discover: category rail ---------- */
+/* ---------- Discover: header chips (Figma 1666:6720) ---------- */
 
-.cat-rail {
+.chip-rail {
   display: flex;
+  gap: 8px;
+  /* The rail runs past both edges of the sheet, so it undoes the drag zone's
+     padding and carries the 16px inset itself. */
   margin: 0 -16px;
-  padding: 0 12px;
+  /* Figma puts the chips 32px under the handle; 8px of that is the handle's own
+     margin. The bottom is the frame's 10px, which also clears the chip shadow. */
+  padding: 24px 16px 10px;
   overflow-x: auto;
   scrollbar-width: none;
+  touch-action: pan-x;
 }
 
-.cat-rail::-webkit-scrollbar {
+.chip-rail::-webkit-scrollbar {
   display: none;
 }
 
-.cat {
+.chip {
   flex: none;
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 5px 16px;
-  border-radius: 8px;
-  font-size: 12px;
-  letter-spacing: -0.36px;
+  padding: 8px 12px 8px 10px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: -0.42px;
   /* Every label is Ink/Primary in the design — the active state is a background
      tint only, since the rail is interactive here in a way the frames don't show. */
   color: var(--ink-primary);
+  white-space: nowrap;
   transition: background 140ms ease;
 }
 
-.cat.is-active {
+.chip.is-active {
   background: var(--surface-dim);
 }
 
-.cat-emoji {
-  font-size: 24px;
-  line-height: 1;
+.chip-icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
 }
 
 .view-more {
@@ -1258,10 +1303,10 @@
 }
 
 .curated-badge-avatar {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
-  border: 1px solid #fff;
+  border: 1px solid rgba(0, 0, 0, 0.5);
   object-fit: cover;
 }
 
@@ -1309,13 +1354,16 @@
 /* Surface/Drag Handle is what Figma uses for the overlaid metadata. */
 .curated-card .rating-value,
 .curated-card .rating-count,
-.curated-card .rating-suffix {
+.curated-card .rating-suffix,
+.curated-card .rating-dot,
+.curated-card .rating-gem {
   color: var(--drag-handle);
 }
 
 .is-hero .rating-value,
 .is-hero .rating-count,
-.is-hero .rating-suffix {
+.is-hero .rating-suffix,
+.is-hero .rating-dot {
   font-size: 14px;
   line-height: 20px;
 }

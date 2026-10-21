@@ -58,3 +58,26 @@ export function offsetCenter(
   const latLng = projection.fromPointToLatLng(shifted)
   return latLng ? { lat: latLng.lat(), lng: latLng.lng() } : null
 }
+
+/**
+ * Where a coordinate falls relative to the middle of the map, in pixels. The
+ * inverse of `offsetCenter`, and the same world-coordinate maths: it answers
+ * whether something is on screen at all, which `getBounds` can't, since the
+ * sheet covers the bottom of the viewport it reports.
+ */
+export function pixelFromCenter(
+  map: google.maps.Map,
+  target: google.maps.LatLngLiteral,
+): { x: number; y: number } | null {
+  const projection = map.getProjection()
+  const centre = map.getCenter()
+  const zoom = map.getZoom()
+  if (!projection || !centre || zoom == null) return null
+
+  const a = projection.fromLatLngToPoint(new google.maps.LatLng(target))
+  const b = projection.fromLatLngToPoint(centre)
+  if (!a || !b) return null
+
+  const scale = 2 ** zoom
+  return { x: (a.x - b.x) * scale, y: (a.y - b.y) * scale }
+}

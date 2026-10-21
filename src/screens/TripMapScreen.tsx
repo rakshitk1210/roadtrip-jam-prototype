@@ -6,6 +6,7 @@ import { MapCanvas } from '../map/MapCanvas'
 import { BottomSheet } from '../sheet/BottomSheet'
 import { ItineraryTab } from '../sheet/ItineraryTab'
 import { DiscoverTab } from '../sheet/DiscoverTab'
+import { DiscoverHeader } from '../sheet/DiscoverHeader'
 import { PlaceDetailSheet } from '../sheet/PlaceDetailSheet'
 import { HiddenGemScreen } from '../sheet/HiddenGemScreen'
 import { ReviewScreen } from '../sheet/ReviewScreen'
@@ -64,6 +65,7 @@ export function TripMapScreen() {
         snap={snap}
         onSnapChange={setSnap}
         className={detailOpen ? 'sheet-detail' : ''}
+        header={!detailOpen && tab === 'discover' ? <DiscoverHeader /> : null}
       >
         {detailOpen ? (
           <PlaceDetailSheet placeId={activePlaceId} />

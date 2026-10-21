@@ -241,8 +241,8 @@ export interface PlaceOverride {
 }
 
 // The cache is returned whole, so adding a designed place to the match list
-// needs a new key or the new id is never looked up. v2 adds Kona Kitchen.
-const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v2'
+// needs a new key or the new id is never looked up. v3 adds the alpaca ranch.
+const OVERRIDE_CACHE_KEY = 'roadtrip-jam:overrides:v3'
 
 /**
  * Looks a designed place up by name and pulls its real photographs. The Kangaroo

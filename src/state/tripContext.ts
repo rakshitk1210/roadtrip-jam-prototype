@@ -62,6 +62,12 @@ export interface TripState {
   /** Which photo is picked as the souvenir's background — cosmetic only. */
   backgroundPhotoId: string | null
   gems: string[]
+  /**
+   * The place just marked a gem, which the map moves to show. Spent by the map
+   * rather than the store, so the camera goes there once and stays where it is
+   * left afterwards.
+   */
+  gemmedId: string | null
   toast: string | null
   /**
    * Saved places shown in Discover and pinned on the map. Starts as the designed
@@ -132,7 +138,14 @@ export interface TripValue extends TripState {
   clearToast: () => void
   /** Drops the highlight from the newly added stop. */
   clearAdded: () => void
+  /** Drops the pending camera move, once the map has made it. */
+  clearGemmed: () => void
   hasGem: (id: string) => boolean
+  /**
+   * Whether this gem is one you marked, rather than one the trip arrived with.
+   * A place found by other people says so instead.
+   */
+  markedGem: (id: string) => boolean
   /** Resolves any tappable place — designed, seeded, or fetched from Places. */
   findPlace: (id: string) => Place | undefined
   enterSelect: () => void
